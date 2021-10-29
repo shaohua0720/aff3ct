@@ -1,13 +1,21 @@
+/**
+ * 
+ * 
+ * 
+ **/
 #ifndef OFDM_HPP_
 #define OFDM_HPP_
 
 #include <iostream>
+#include <complex>
+#include <fftw3.h>
 #include "Tools/Interface/Interface_set_seed.hpp"
 #include "Tools/Interface/Interface_is_done.hpp"
 #include "Tools/Interface/Interface_reset.hpp"
 #include "Module/Task.hpp"
 #include "Module/Socket.hpp"
 #include "Module/Module.hpp"
+
 
 namespace aff3ct
 {
@@ -17,8 +25,7 @@ namespace aff3ct
         {
             enum class tsk : size_t
             {
-                generate,
-                SIZE
+                modulate, demodulate, SIZE
             };
             namespace sck
             {
@@ -48,13 +55,16 @@ namespace aff3ct
 
         public:
             Ofdm(const int M, const int N = 14);
-            virtual ~Ofdm() = default;
+            virtual ~Ofdm();
             virtual Ofdm<B> *clone() const;
 
-            template <class AB = std::allocator<B>>
-            void modulate(const std::vector<B, AB> &X_K, std::vector<B, AB> &Y_K, int frame_id = -1);
-            template <typename AB = std::allocator<B>>
-            void demodulate(const std::vector<B, AB> &X_K, std::vector<B, AB> &Y_K, int frame_id = -1);
+            void modulate(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K, int frame_id = -1);
+            void demodulate(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K, int frame_id = -1);
+        private:
+            fftw_plan modu;
+            fftw_complex *modu_in, *modu_out;
+            fftw_plan demodu;
+            fftw_complex *demodu_in, *demodu_out;
         };
     }
 

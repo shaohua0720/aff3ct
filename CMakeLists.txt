@@ -15,6 +15,7 @@ project(aff3ct)
 # ------------------------------------------------------------------------------------------------------- CMAKE OPTIONS
 # ---------------------------------------------------------------------------------------------------------------------
 
+
 option(AFF3CT_COMPILE_EXE        "Compile the executable"                                                   ON )
 option(AFF3CT_COMPILE_STATIC_LIB "Compile the static library"                                               OFF)
 option(AFF3CT_COMPILE_SHARED_LIB "Compile the shared library"                                               OFF)
@@ -489,6 +490,11 @@ set(CMAKE_THREAD_PREFER_PTHREAD ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 aff3ct_target_link_libraries(PUBLIC Threads::Threads)
+
+# FFTW3
+find_package(FFTW3 REQUIRED)
+aff3ct_target_include_directories2(PUBLIC "${FFTW3_INCLUDE_DIRS}")
+aff3ct_target_link_libraries(PUBLIC "${FFTW3_LIBRARIES}")
 
 # ---------------------------------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------------------- EXPORT
