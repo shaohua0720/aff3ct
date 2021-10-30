@@ -1431,6 +1431,9 @@
 #ifndef INTERPOLATION_H_
 #include <Tools/Math/interpolation.h>
 #endif
+#ifndef LCONV_H
+#include <Tools/Math/lconv.h>
+#endif
 #ifndef MATRIX_H
 #include <Tools/Math/matrix.h>
 #endif
