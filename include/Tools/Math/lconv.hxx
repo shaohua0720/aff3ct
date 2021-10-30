@@ -11,6 +11,11 @@ namespace aff3ct
                   std::vector<T, AT> &out, int &out_len)
         {
             out_len = len1 + len2 - 1;
+            if (out.size()<out_len)
+            {
+                out.resize(out_len);
+            }
+            
             for (int i = 0; i < len1; i++)
                 for (int j = 0; j < len2; j++)
                 {
