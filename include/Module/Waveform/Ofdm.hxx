@@ -1,6 +1,8 @@
 #include "Tools/Exception/exception.hpp"
 #include "Module/Waveform/Ofdm.hpp"
 #include <numeric>
+#include <math.h>
+
 namespace aff3ct
 {
     namespace module
@@ -33,7 +35,7 @@ namespace aff3ct
 
             if (padding)
             {
-                fft_size = 2 ^ ceil(log2(M));
+                fft_size = pow(2 , ceil(log2(M)));
                 start_pos = floor((fft_size - M) / 2); // place at the center band.
                 end_pos = start_pos + M - 1;
             }
@@ -65,12 +67,6 @@ namespace aff3ct
         {
             assert(cp.size()==N);
             std::copy(cp.begin(), cp.end(), this->cp.begin());
-        }
-
-        template <typename B>
-        void Ofdm<B>::setSamplingRate(const int sp)
-        {
-            this->sample_rate = sp;
         }
 
         template <typename B>

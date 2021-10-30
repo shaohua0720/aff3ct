@@ -14,8 +14,11 @@
 #include "Tools/Display/rang_format/rang_format.h"
 #include "Launcher/Launcher.hpp"
 #include "Factory/Launcher/Launcher.hpp"
+#include "aff3ct.hpp"
+#include <complex>
 
 using namespace aff3ct;
+using namespace module;
 
 void print_version()
 {
@@ -189,6 +192,31 @@ int read_arguments(const int argc, const char** argv, factory::Launcher &params)
 
 int main(int argc, char **argv)
 {
+
+	Ofdm<double> * ofdm = new Ofdm<double>(4,4);
+	std::vector<std::complex<double>> x_in;
+	 double a[32]= {
+		3.5468 , 4.4545,   3.2755 , 0.7465,   4.7987 , 4.0714,   3.7563 , 0.9830,
+		3.7734 , 4.7965,   0.8131 , 1.2875,   1.7019 , 1.2176,   1.2755 , 1.2554,
+		1.3801 , 2.7361,   0.5950 , 4.2036,   2.9263 , 4.6463,   2.5298 , 3.0802,
+		3.3985 , 0.6931,   2.4918 , 1.2714,   1.1191 , 1.7499,   3.4954 , 2.3664
+		};
+	for (size_t i = 0; i < 32; )
+	{
+		x_in.push_back(std::complex<double>(a[i],a[i+1]));
+		i+=2;
+	}
+	
+	std::vector<std::complex<double>> x_out;
+	ofdm->modulate(x_in,x_out,1);
+
+	for(auto ia : x_in)
+	{
+		std::cout<<ia<< " ";
+	}
+
+	return 0;
+/******************************** above for test **************************/	
 	int exit_code = EXIT_SUCCESS;
 #ifdef AFF3CT_MPI
 	MPI_Init(nullptr, nullptr);

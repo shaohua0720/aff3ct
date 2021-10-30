@@ -16,7 +16,6 @@
 #include "Module/Socket.hpp"
 #include "Module/Module.hpp"
 
-
 namespace aff3ct
 {
     namespace module
@@ -59,13 +58,11 @@ namespace aff3ct
             virtual Ofdm<B> *clone() const;
 
             void setCPlength(const std::vector<int> cp);
-            void setSamplingRate(const int sp);
 
             void modulate(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K, int frame_id = -1);
             void demodulate(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K, int frame_id = -1);
         private:
             std::vector<int> cp; // cyclic prefix points
-            const int sample_rate;
             int fft_size;
             bool padding; //if padding is enabled for fft and scs numbers.
             int start_pos=0;
