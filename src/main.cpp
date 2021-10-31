@@ -213,8 +213,8 @@ int main(int argc, char **argv)
 	/******************************above code for test*************************************/
 
 
-	Ofdm<double> * ofdm = new Ofdm<double>(4,4);
-	std::vector<std::complex<double>> x_in;
+	//Ofdm<double> * ofdm = new Ofdm<double>(4,4);
+	//std::vector<std::complex<double>> x_in;
 	double a[32]= {
 		1.8033 , 1.7566,  0.1786 , 0.1893  , 2.9690 , 1.6081 ,  1.9659 , 1.6188,
 		0.2790 , 0.4408 ,  2.7060 , 2.4935  , 2.3315 , 3.8310 ,  0.9028 , 3.5956,
@@ -223,37 +223,38 @@ int main(int argc, char **argv)
 		};
 	std::cout<<"SRC:"<<std::endl;
 	
-	for (size_t i = 0; i < 32; )
+	for (size_t i = 0; i < 32; i++ )
 	{
-		x_in.push_back(std::complex<double>(a[i],a[i+1]));
-		std::cout<<x_in.back()<<" ";
-		i+=2;
+		//x_in.push_back(std::complex<double>(a[i],a[i+1]));
+		std::cout<<a[i]<<" ";
+		//i+=1;
 	}
 	
 	std::vector<int> cp = {1,2,1,1};
-	ofdm->setCPlength(cp);
+	//ofdm->setCPlength(cp);
 
-	std::vector<std::complex<double>> x_out;
-	//ofdm->modulate(x_in,x_out,1);
+	double x_out[32];
+	//ofdm->modulate(a,x_out,1);
 
 	std::cout<<std::endl<<"FFT:"<<std::endl;
-	for(auto ia : x_out)
+	for(size_t i = 0; i < 32; )
 	{
-		std::cout<<ia<< " ";
+		std::cout<<x_out[i]<< " ";
 	}
+	std::cout<<std::endl;
 	// double b[32] = {
 	// 	6.9168,5.1728,-2.5952,1.9358, 2.6278,1.5566,0.2638,-1.6388,
 	// 	6.2193,10.3609,-3.1546,-5.1934,-0.9983,-1.8173,-0.9504,-1.587,
 	// 	5.6947,10.677,-0.6292,2.4285,3.5939,-5.5484,0.3458,1.1697,
 	// 	6.5199,11.1257,-0.7308,1.5268,-0.3717,-6.1581,-3.3122,2.3396
 	// };
-	std::vector<std::complex<double>> c_out;
-	//ofdm->demodulate(x_out,c_out,1);
-	std::cout<<std::endl<<"IFFT:"<<std::endl;
-	for(auto ia : c_out)
-	{
-		std::cout<<ia<< " ";
-	}
+	// std::vector<std::complex<double>> c_out;
+	// //ofdm->demodulate(x_out,c_out,1);
+	// std::cout<<std::endl<<"IFFT:"<<std::endl;
+	// for(auto ia : c_out)
+	// {
+	// 	std::cout<<ia<< " ";
+	// }
 	return 0;
 /******************************** above for test **************************/
 	
