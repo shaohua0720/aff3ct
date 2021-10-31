@@ -234,7 +234,7 @@ int main(int argc, char **argv)
 	ofdm->setCPlength(cp);
 
 	std::vector<std::complex<double>> x_out;
-	ofdm->modulate(x_in,x_out,1);
+	//ofdm->modulate(x_in,x_out,1);
 
 	std::cout<<std::endl<<"FFT:"<<std::endl;
 	for(auto ia : x_out)
@@ -248,7 +248,7 @@ int main(int argc, char **argv)
 	// 	6.5199,11.1257,-0.7308,1.5268,-0.3717,-6.1581,-3.3122,2.3396
 	// };
 	std::vector<std::complex<double>> c_out;
-	ofdm->demodulate(x_out,c_out,1);
+	//ofdm->demodulate(x_out,c_out,1);
 	std::cout<<std::endl<<"IFFT:"<<std::endl;
 	for(auto ia : c_out)
 	{

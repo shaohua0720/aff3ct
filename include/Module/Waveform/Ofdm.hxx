@@ -35,7 +35,7 @@ namespace aff3ct
 
             if (padding)
             {
-                fft_size = pow(2 , ceil(log2(M)));
+                fft_size = pow(2, ceil(log2(M)));
                 start_pos = floor((fft_size - M) / 2); // place at the center band.
                 end_pos = start_pos + M - 1;
             }
@@ -44,7 +44,7 @@ namespace aff3ct
                 fft_size = M;
             }
 
-            std::cout<<"fft size:"<<M<<std::endl;
+            std::cout << "fft size:" << M << std::endl;
 
             fft_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
             fft_out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
@@ -56,24 +56,24 @@ namespace aff3ct
             ifft_plan = fftw_plan_dft_1d(fft_size, ifft_in, ifft_out, FFTW_BACKWARD, FFTW_MEASURE);
 
             // create related modulate and demodulates
-            auto& p_mod = this->create_task("modulate");
-            auto pin_X_K = this->template create_socket_in<B>(p_mod, "X_K", 2*M*N); //std::complex<B> = 2*B
-            auto pin_Y_K = this->template create_socket_out<B>(p_mod, "Y_K", 2*M*N); 
+            auto &p_mod = this->create_task("modulate");
+            auto pin_X_K = this->template create_socket_in<B>(p_mod, "X_K", 2 * M * N); //std::complex<B> = 2*B
+            auto pin_Y_K = this->template create_socket_out<B>(p_mod, "Y_K", 2 * M * N);
 
-            this->create_codelet(p_mod, [pin_X_K,pin_Y_K](Module &m, Task &t, const size_t frame_id) -> int
-            {
-                auto &ofdm = static_cast<Ofdm<B>&>(m);
-                B* in = static_cast<B*>(t[pin_X_K].get_dataptr());
-                B* out = static_cast<B*>(t[pin_Y_K].get_dataptr());
-                return status_t::SUCCESS;
-            });
+            this->create_codelet(p_mod, [pin_X_K, pin_Y_K](Module &m, Task &t, const size_t frame_id) -> int
+                                 {
+                                     auto &ofdm = static_cast<Ofdm<B> &>(m);
+                                     B *in = static_cast<B *>(t[pin_X_K].get_dataptr());
+                                     B *out = static_cast<B *>(t[pin_Y_K].get_dataptr());
+                                     return status_t::SUCCESS;
+                                 });
         }
 
         template <typename B>
         void Ofdm<B>::setCPlength(std::vector<int> cp)
         {
-            assert(cp.size()==N);
-            this->cp.insert(this->cp.begin(),cp.begin(),cp.end());
+            assert(cp.size() == N);
+            this->cp.insert(this->cp.begin(), cp.begin(), cp.end());
         }
 
         template <typename B>
@@ -94,39 +94,26 @@ namespace aff3ct
         }
 
         template <typename B>
-        void Ofdm<B>::modulate(const std::vector<std::complex<B>> &constell, std::vector<std::complex<B>> &Y_K,int frame_id)
+        void Ofdm<B>::modulate(const B *X_K, B *Y_K, int frame_id)
         {
-            assert(constell.size()==M*N);
-            static std::vector<std::complex<B>> mod_symWoCP;
-            static std::vector<std::complex<B>> TDSym; // time domain points.
-            
-            for(size_t i = 0 ;i < N; i++)
+            B data[fft_size * sizeof(std::complex<B>)]; // for one symbol
+            size_t pos = 0;
+            for (size_t i = 0; i < N; i++)
             {
-                mod_symWoCP.insert(mod_symWoCP.begin()+start_pos,constell.begin()+i*M,constell.begin()+i*M+M);
-                this->_ifft(mod_symWoCP,TDSym);
-                
-                Y_K.insert(Y_K.end(),TDSym.end()-this->cp[i],TDSym.end()); //insert CP
-                Y_K.insert(Y_K.end(),TDSym.begin(),TDSym.end());
-                mod_symWoCP.clear();
-                TDSym.clear();
+                this->_ifft(X_K + i * M * sizeof(std::complex<B>), Y_K + pos + cp[i]);
+                memcpy(Y_K + pos, Y_K + pos + fft_size, cp[i] * sizeof(std::complex<B>)); //copy the cp
+                pos = pos + cp[i] + fft_size;                                             //update the cursor
             }
         }
 
         template <typename B>
-        void Ofdm<B>::demodulate(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K,int frame_id)
+        void Ofdm<B>::demodulate(const B *X_K, B *Y_K, int frame_id)
         {
-            static std::vector<std::complex<B>> demod_symWoCP;
-            static std::vector<std::complex<B>> FDSym;
-            auto idx = X_K.begin();
-            for(size_t i = 0;i < N; i++)
+            size_t pos = 0;
+            for (size_t i = 0; i < N; i++)
             {
-                demod_symWoCP.insert(demod_symWoCP.begin(),idx+this->cp[i],idx+this->cp[i]+fft_size); // discard cp
-                idx = idx + this->cp[i]+fft_size;
-
-                this->_fft(demod_symWoCP,FDSym);
-                Y_K.insert(Y_K.end(),FDSym.begin()+start_pos,FDSym.begin()+start_pos+M); // extract signal
-                demod_symWoCP.clear();
-                FDSym.clear();
+                this->_fft(X_K + pos + cp[i], Y_K + i * M * sizeof(std::complex<B>)); //discard cp
+                pos = pos + cp[i] + fft_size;                                         //update the cursor
             }
         }
     }

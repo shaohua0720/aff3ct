@@ -72,8 +72,8 @@ namespace aff3ct
 
             void setCPlength(const std::vector<int> cp);
 
-            void modulate(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K,int frame_id = -1);
-            void demodulate(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K,int frame_id = -1);
+            void modulate(const B *X_K, B *Y_K,int frame_id = -1);
+            void demodulate(const B *X_K,  B *Y_K,int frame_id = -1);
 
         private:
             std::vector<int> cp; // cyclic prefix points
@@ -88,8 +88,8 @@ namespace aff3ct
             fftw_complex *ifft_in, *ifft_out;
 
         protected:
-            void _fft(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K);
-            void _ifft(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K);
+            void _fft(const B *X_K, B *Y_K);
+            void _ifft(const B *X_K, B *Y_K);
         };
     }
 

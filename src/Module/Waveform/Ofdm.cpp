@@ -7,25 +7,19 @@ using namespace aff3ct;
 using namespace aff3ct::module;
 
 template <typename B>
-void Ofdm<B>::_fft(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K)
+void Ofdm<B>::_fft(const B *X_K, B *Y_K)
 {
-    memcpy(fft_in, X_K.data(), M * sizeof(std::complex<B>));
+    memcpy(fft_in, X_K, M * sizeof(std::complex<B>));
     fftw_execute(fft_plan);
-    for (size_t j = 0; j < M; j++)
-    {
-        Y_K.push_back(std::complex<B>(fft_out[j][0], fft_out[j][1]));
-    }
+    memcpy(Y_K, fft_out, M * sizeof(std::complex<B>));
 }
 
 template <typename B>
-void Ofdm<B>::_ifft(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K)
+void Ofdm<B>::_ifft(const B *X_K, B *Y_K)
 {
-    memcpy(ifft_in, X_K.data(), M * sizeof(std::complex<B>));
+    memcpy(ifft_in, X_K, M * sizeof(std::complex<B>));
     fftw_execute(ifft_plan);
-    for (size_t j = 0; j < M; j++)
-    {
-        Y_K.push_back(std::complex<B>(ifft_out[j][0], ifft_out[j][1]));
-    }
+    memcpy(Y_K, ifft_out, M * sizeof(std::complex<B>));
 }
 
 #include "Tools/types.h"
