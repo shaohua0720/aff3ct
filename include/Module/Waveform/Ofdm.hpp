@@ -84,6 +84,7 @@ namespace aff3ct
             fftw_plan ifft_plan;
             fftw_complex *ifft_in, *ifft_out;
 
+        protected:
             void _fft(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K);
             void _ifft(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K);
         };

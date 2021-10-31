@@ -29,7 +29,7 @@ namespace aff3ct
         Ofdm<B>::Ofdm(const int M, const int N, const bool padding) : Module(), M(M), N(N), padding(padding)
         {
 
-            const std::string name = "Waveform";
+            const std::string name = "OFDM";
             this->set_name(name);
             this->set_short_name(name);
 
@@ -95,7 +95,6 @@ namespace aff3ct
             static std::vector<std::complex<B>> mod_symWoCP;
             static std::vector<std::complex<B>> TDSym; // time domain points.
             
-            std::cout<<std::endl;
             for(size_t i = 0 ;i < N; i++)
             {
                 mod_symWoCP.insert(mod_symWoCP.begin()+start_pos,constell.begin()+i*M,constell.begin()+i*M+M);
@@ -120,7 +119,6 @@ namespace aff3ct
                 idx = idx + this->cp[i]+fft_size;
 
                 this->_fft(demod_symWoCP,FDSym);
-
                 Y_K.insert(Y_K.end(),FDSym.begin()+start_pos,FDSym.begin()+start_pos+M); // extract signal
                 demod_symWoCP.clear();
                 FDSym.clear();
