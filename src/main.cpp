@@ -14,10 +14,13 @@
 #include "Tools/Display/rang_format/rang_format.h"
 #include "Launcher/Launcher.hpp"
 #include "Factory/Launcher/Launcher.hpp"
+#include "aff3ct.hpp"
+#include <complex>
 
 #include "aff3ct.hpp"
 
 using namespace aff3ct;
+using namespace module;
 
 void print_version()
 {
@@ -191,24 +194,63 @@ int read_arguments(const int argc, const char** argv, factory::Launcher &params)
 
 int main(int argc, char **argv)
 {
-	std::vector<int> a = {1,2,3,4,5};
-	std::vector<int> b = {4,5,6};
-	std::vector<int> c;
-	int len = 0;
-	//c.resize(8);
-	tools::conv<int>(a,5,b,3,c,len);
-	std::cout<<"linear convolution:";
-	for(auto ele : c)
-	{
-		std::cout<<ele<<" ";
-	}	
-	std::cout<<std::endl;
-	std::cout<<"len:"<<len<<std::endl;
+	// std::vector<int> a = {1, 2, 3, 4, 5};
+	// std::vector<int> b = {4, 5, 6};
+	// std::vector<int> c;
+	// int len = 0;
+	// //c.resize(8);
+	// tools::conv<int>(a, 5, b, 3, c, len);
+	// std::cout << "linear convolution:";
+	// for (auto ele : c)
+	// {
+	// 	std::cout << ele << " ";
+	// }
+	// std::cout << std::endl;
+	// std::cout << "len:" << len << std::endl;
 
-	return 0;
+	// return 0;
 
-/******************************above code for test*************************************/
+	/******************************above code for test*************************************/
 
+
+	// Ofdm<double> * ofdm = new Ofdm<double>(4,4);
+	// std::vector<std::complex<double>> x_in;
+	//  double a[32]= {
+	// 	1.8033 , 1.7566,  0.1786 , 0.1893  , 2.9690 , 1.6081 ,  1.9659 , 1.6188,
+	// 	0.2790 , 0.4408 ,  2.7060 , 2.4935  , 2.3315 , 3.8310 ,  0.9028 , 3.5956,
+	// 	2.2513 , 2.1817 ,  0.2105 , 3.8126  , 2.3930 , 0.3826 ,  0.8399 , 4.3001,
+	// 	0.5263 , 2.2085 ,  1.9261 , 4.9663  , 2.5478 , 0.2753 ,  1.5197 , 3.6756
+	// 	};
+	// std::cout<<"src:"<<std::endl;
+	// for (size_t i = 0; i < 32; )
+	// {
+	// 	x_in.push_back(std::complex<double>(a[i],a[i+1]));
+	// 	std::cout<<x_in.back()<<" ";
+	// 	i+=2;
+	// }
+	
+	// std::vector<std::complex<double>> x_out;
+	// ofdm->modulate(x_in,x_out,1);
+	// std::cout<<std::endl<<"FFT:"<<std::endl;
+	// for(auto ia : x_out)
+	// {
+	// 	std::cout<<ia<< " ";
+	// }
+	// // double b[32] = {
+	// // 	6.9168,5.1728,-2.5952,1.9358, 2.6278,1.5566,0.2638,-1.6388,
+	// // 	6.2193,10.3609,-3.1546,-5.1934,-0.9983,-1.8173,-0.9504,-1.587,
+	// // 	5.6947,10.677,-0.6292,2.4285,3.5939,-5.5484,0.3458,1.1697,
+	// // 	6.5199,11.1257,-0.7308,1.5268,-0.3717,-6.1581,-3.3122,2.3396
+	// // };
+	// std::vector<std::complex<double>> c_out;
+	// ofdm->demodulate(x_out,c_out,1);
+	// std::cout<<std::endl<<"IFFT:"<<std::endl;
+	// for(auto ia : c_out)
+	// {
+	// 	std::cout<<ia<< " ";
+	// }
+	// return 0;
+/******************************** above for test **************************/	
 	int exit_code = EXIT_SUCCESS;
 #ifdef AFF3CT_MPI
 	MPI_Init(nullptr, nullptr);

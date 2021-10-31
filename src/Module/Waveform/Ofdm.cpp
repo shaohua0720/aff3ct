@@ -1,6 +1,7 @@
 #include "Module/Waveform/Ofdm.hpp"
 #include <fftw3.h>
 #include <algorithm>
+#include <string.h>
 
 using namespace aff3ct;
 using namespace aff3ct::module;
@@ -10,9 +11,12 @@ void Ofdm<B>::modulate(const std::vector<std::complex<B>> &X_K, std::vector<std:
 {
     for (size_t i = 0; i < N; i++)
     {
-        std::copy_n(X_K.begin()+i*M,M,modu_in);
+        memcpy(modu_in,X_K.data()+i*M,M*sizeof(std::complex<B>));
         fftw_execute(modu);
-        std::copy_n(modu_out,M,Y_K.begin()+i*M);
+        for(size_t j=0;j<M;j++)
+        {   
+            Y_K.push_back(std::complex<B>(modu_out[j][0],modu_out[j][1]));
+        }
     }
 }
 
@@ -21,8 +25,14 @@ void Ofdm<B>::demodulate(const std::vector<std::complex<B>> &X_K, std::vector<st
 {
     for (size_t i = 0; i < N; i++)
     {
-        std::copy_n(X_K.begin()+i*M,M,demodu_in);
-        fftw_execute(modu);
-        std::copy_n(demodu_out,M,Y_K.begin()+i*M);
+        memcpy(demodu_in,X_K.data()+i*M,M*sizeof(std::complex<B>));
+        fftw_execute(demodu);
+        for(size_t j=0;j<M;j++)
+        {   
+            Y_K.push_back(std::complex<B>(demodu_out[j][0],demodu_out[j][1]));
+        }
     }
 }
+
+#include "Tools/types.h"
+template class aff3ct::module::Ofdm<Q_64>;

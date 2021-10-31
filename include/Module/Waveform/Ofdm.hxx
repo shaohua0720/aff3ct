@@ -1,6 +1,8 @@
 #include "Tools/Exception/exception.hpp"
 #include "Module/Waveform/Ofdm.hpp"
 #include <numeric>
+#include <math.h>
+
 namespace aff3ct
 {
     namespace module
@@ -33,7 +35,7 @@ namespace aff3ct
 
             if (padding)
             {
-                fft_size = 2 ^ ceil(log2(M));
+                fft_size = pow(2 , ceil(log2(M)));
                 start_pos = floor((fft_size - M) / 2); // place at the center band.
                 end_pos = start_pos + M - 1;
             }
@@ -42,14 +44,16 @@ namespace aff3ct
                 fft_size = M;
             }
 
+            std::cout<<"fft size:"<<M<<std::endl;
+
             modu_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
             modu_out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
 
             demodu_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
             demodu_out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
 
-            fftw_plan_dft_1d(M, modu_in, modu_out, FFTW_FORWARD, FFTW_MEASURE);
-            fftw_plan_dft_1d(M, demodu_in, demodu_out, FFTW_BACKWARD, FFTW_MEASURE);
+            modu = fftw_plan_dft_1d(fft_size, modu_in, modu_out, FFTW_FORWARD, FFTW_MEASURE);
+            demodu = fftw_plan_dft_1d(fft_size, demodu_in, demodu_out, FFTW_BACKWARD, FFTW_MEASURE);
 
             // create related modulate and demodulates
             /* auto& p = this->create_task("modulate");
@@ -65,12 +69,6 @@ namespace aff3ct
         {
             assert(cp.size()==N);
             std::copy(cp.begin(), cp.end(), this->cp.begin());
-        }
-
-        template <typename B>
-        void Ofdm<B>::setSamplingRate(const int sp)
-        {
-            this->sample_rate = sp;
         }
 
         template <typename B>

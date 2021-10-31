@@ -16,7 +16,6 @@
 #include "Module/Socket.hpp"
 #include "Module/Module.hpp"
 
-
 namespace aff3ct
 {
     namespace module
@@ -25,7 +24,9 @@ namespace aff3ct
         {
             enum class tsk : size_t
             {
-                modulate, demodulate, SIZE
+                modulate,
+                demodulate,
+                SIZE
             };
             namespace sck
             {
@@ -41,6 +42,14 @@ namespace aff3ct
                 };
             }
         }
+        template <typename B = double> union _cpl_union
+        {
+            std::complex<B> cpl;
+            B data[2]; // for fftw
+        };
+
+        template <typename B>
+        using cplx = _cpl_union<B>;
 
         template <typename B = double>
         class Ofdm : public Module
@@ -54,22 +63,21 @@ namespace aff3ct
             const int M, N; /* Number of frequency and time domain bins. */
 
         public:
-            Ofdm(const int M, const int N = 14, const bool padding=true);
+            Ofdm(const int M, const int N = 14, const bool padding = true);
             virtual ~Ofdm();
             virtual Ofdm<B> *clone() const;
 
             void setCPlength(const std::vector<int> cp);
-            void setSamplingRate(const int sp);
 
             void modulate(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K, int frame_id = -1);
             void demodulate(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K, int frame_id = -1);
+
         private:
             std::vector<int> cp; // cyclic prefix points
-            const int sample_rate;
             int fft_size;
             bool padding; //if padding is enabled for fft and scs numbers.
-            int start_pos=0;
-            int end_pos=M-1;
+            int start_pos = 0;
+            int end_pos = M - 1;
 
             fftw_plan modu;
             fftw_complex *modu_in, *modu_out;
