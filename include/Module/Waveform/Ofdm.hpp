@@ -32,24 +32,27 @@ namespace aff3ct
             {
                 enum class modulate : size_t
                 {
-                    X_K,
+                    X_K, //in
+                    Y_K, //out
                     status
                 };
                 enum class demodulate : size_t
                 {
-                    Y_K,
+                    X_K, //in
+                    Y_K, //out
                     status
                 };
             }
         }
-        template <typename B = double> union _cpl_union
-        {
-            std::complex<B> cpl;
-            B data[2]; // for fftw
-        };
+    
+        // template <typename B = double> union _cpl_union
+        // {
+        //     std::complex<B> cpl;
+        //     B data[2]; // for fftw
+        // };
 
-        template <typename B>
-        using cplx = _cpl_union<B>;
+        // template <typename B>
+        // using cplx = _cpl_union<B>;
 
         template <typename B = double>
         class Ofdm : public Module

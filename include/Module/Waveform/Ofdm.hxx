@@ -56,12 +56,17 @@ namespace aff3ct
             ifft_plan = fftw_plan_dft_1d(fft_size, ifft_in, ifft_out, FFTW_BACKWARD, FFTW_MEASURE);
 
             // create related modulate and demodulates
-            /* auto& p = this->create_task("modulate");
-            auto ps_X_K = this->template create_socket_in<B>(p, "X_K", 1);
-            this->create_codelet(p, [ps_X_K](Module &m, Task &t, const size_t frame_id) -> int
+            auto& p_mod = this->create_task("modulate");
+            auto pin_X_K = this->template create_socket_in<B>(p_mod, "X_K", 2*M*N); //std::complex<B> = 2*B
+            auto pin_Y_K = this->template create_socket_out<B>(p_mod, "Y_K", 2*M*N); 
+
+            this->create_codelet(p_mod, [pin_X_K,pin_Y_K](Module &m, Task &t, const size_t frame_id) -> int
             {
                 auto &ofdm = static_cast<Ofdm<B>&>(m);
-            } */
+                B* in = static_cast<B*>(t[pin_X_K].get_dataptr());
+                B* out = static_cast<B*>(t[pin_Y_K].get_dataptr());
+                return status_t::SUCCESS;
+            });
         }
 
         template <typename B>
