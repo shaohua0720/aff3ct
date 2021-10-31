@@ -69,8 +69,8 @@ namespace aff3ct
 
             void setCPlength(const std::vector<int> cp);
 
-            void modulate(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K, int frame_id = -1);
-            void demodulate(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K, int frame_id = -1);
+            void modulate(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K,int frame_id = -1);
+            void demodulate(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K,int frame_id = -1);
 
         private:
             std::vector<int> cp; // cyclic prefix points
@@ -79,10 +79,13 @@ namespace aff3ct
             int start_pos = 0;
             int end_pos = M - 1;
 
-            fftw_plan modu;
-            fftw_complex *modu_in, *modu_out;
-            fftw_plan demodu;
-            fftw_complex *demodu_in, *demodu_out;
+            fftw_plan fft_plan;
+            fftw_complex *fft_in, *fft_out;
+            fftw_plan ifft_plan;
+            fftw_complex *ifft_in, *ifft_out;
+
+            void _fft(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K);
+            void _ifft(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K);
         };
     }
 

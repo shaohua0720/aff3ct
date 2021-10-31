@@ -46,14 +46,14 @@ namespace aff3ct
 
             std::cout<<"fft size:"<<M<<std::endl;
 
-            modu_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
-            modu_out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
+            fft_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
+            fft_out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
 
-            demodu_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
-            demodu_out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
+            ifft_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
+            ifft_out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
 
-            modu = fftw_plan_dft_1d(fft_size, modu_in, modu_out, FFTW_FORWARD, FFTW_MEASURE);
-            demodu = fftw_plan_dft_1d(fft_size, demodu_in, demodu_out, FFTW_BACKWARD, FFTW_MEASURE);
+            fft_plan = fftw_plan_dft_1d(fft_size, fft_in, fft_out, FFTW_FORWARD, FFTW_MEASURE);
+            ifft_plan = fftw_plan_dft_1d(fft_size, ifft_in, ifft_out, FFTW_BACKWARD, FFTW_MEASURE);
 
             // create related modulate and demodulates
             /* auto& p = this->create_task("modulate");
@@ -68,24 +68,63 @@ namespace aff3ct
         void Ofdm<B>::setCPlength(std::vector<int> cp)
         {
             assert(cp.size()==N);
-            std::copy(cp.begin(), cp.end(), this->cp.begin());
+            this->cp.insert(this->cp.begin(),cp.begin(),cp.end());
         }
 
         template <typename B>
         Ofdm<B>::~Ofdm()
         {
-            fftw_destroy_plan(modu); // destroy the fftw
-            fftw_destroy_plan(demodu);
-            fftw_free(modu_in);
-            fftw_free(modu_out);
-            fftw_free(demodu_in);
-            fftw_free(demodu_out);
+            fftw_destroy_plan(fft_plan); // destroy the fftw
+            fftw_destroy_plan(ifft_plan);
+            fftw_free(fft_in);
+            fftw_free(fft_out);
+            fftw_free(ifft_in);
+            fftw_free(ifft_out);
         }
 
         template <typename B>
         Ofdm<B> *Ofdm<B>::clone() const
         {
             throw tools::unimplemented_error(__FILE__, __LINE__, __func__);
+        }
+
+        template <typename B>
+        void Ofdm<B>::modulate(const std::vector<std::complex<B>> &constell, std::vector<std::complex<B>> &Y_K,int frame_id)
+        {
+            assert(constell.size()==M*N);
+            static std::vector<std::complex<B>> mod_symWoCP;
+            static std::vector<std::complex<B>> TDSym; // time domain points.
+            
+            std::cout<<std::endl;
+            for(size_t i = 0 ;i < N; i++)
+            {
+                mod_symWoCP.insert(mod_symWoCP.begin()+start_pos,constell.begin()+i*M,constell.begin()+i*M+M);
+                this->_ifft(mod_symWoCP,TDSym);
+                
+                Y_K.insert(Y_K.end(),TDSym.end()-this->cp[i],TDSym.end()); //insert CP
+                Y_K.insert(Y_K.end(),TDSym.begin(),TDSym.end());
+                mod_symWoCP.clear();
+                TDSym.clear();
+            }
+        }
+
+        template <typename B>
+        void Ofdm<B>::demodulate(const std::vector<std::complex<B>> &X_K, std::vector<std::complex<B>> &Y_K,int frame_id)
+        {
+            static std::vector<std::complex<B>> demod_symWoCP;
+            static std::vector<std::complex<B>> FDSym;
+            auto idx = X_K.begin();
+            for(size_t i = 0;i < N; i++)
+            {
+                demod_symWoCP.insert(demod_symWoCP.begin(),idx+this->cp[i],idx+this->cp[i]+fft_size); // discard cp
+                idx = idx + this->cp[i]+fft_size;
+
+                this->_fft(demod_symWoCP,FDSym);
+
+                Y_K.insert(Y_K.end(),FDSym.begin()+start_pos,FDSym.begin()+start_pos+M); // extract signal
+                demod_symWoCP.clear();
+                FDSym.clear();
+            }
         }
     }
 }
