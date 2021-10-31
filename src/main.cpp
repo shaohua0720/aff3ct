@@ -15,6 +15,8 @@
 #include "Launcher/Launcher.hpp"
 #include "Factory/Launcher/Launcher.hpp"
 
+#include "aff3ct.hpp"
+
 using namespace aff3ct;
 
 void print_version()
@@ -189,6 +191,24 @@ int read_arguments(const int argc, const char** argv, factory::Launcher &params)
 
 int main(int argc, char **argv)
 {
+	std::vector<int> a = {1,2,3,4,5};
+	std::vector<int> b = {4,5,6};
+	std::vector<int> c;
+	int len = 0;
+	//c.resize(8);
+	tools::conv<int>(a,5,b,3,c,len);
+	std::cout<<"linear convolution:";
+	for(auto ele : c)
+	{
+		std::cout<<ele<<" ";
+	}	
+	std::cout<<std::endl;
+	std::cout<<"len:"<<len<<std::endl;
+
+	return 0;
+
+/******************************above code for test*************************************/
+
 	int exit_code = EXIT_SUCCESS;
 #ifdef AFF3CT_MPI
 	MPI_Init(nullptr, nullptr);
