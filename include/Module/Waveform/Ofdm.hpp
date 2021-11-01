@@ -90,6 +90,8 @@ namespace aff3ct
         protected:
             void _fft(const B *X_K, B *Y_K);
             void _ifft(const B *X_K, B *Y_K);
+            void _modulate(const B *X_K, B *Y_K,int frame_id = -1);
+            void _demodulate(const B *X_K,  B *Y_K,int frame_id = -1);
 
             void display_arrary(B* data, size_t size, const std::string info);
         };
