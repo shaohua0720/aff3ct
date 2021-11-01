@@ -67,17 +67,16 @@ namespace aff3ct
             const int M, N; /* Number of frequency and time domain bins. */
 
         public:
-            Ofdm(const int M, const int N = 14, const bool padding = true);
+            Ofdm(const int M, const std::vector<int> cps, const int N = 14,const bool padding = true);
             virtual ~Ofdm();
             virtual Ofdm<B> *clone() const;
-
-            void setCPlength(const std::vector<int> cp);
 
             void modulate(const B *X_K, B *Y_K,int frame_id = -1);
             void demodulate(const B *X_K,  B *Y_K,int frame_id = -1);
 
         private:
             std::vector<int> cp; // cyclic prefix points
+            size_t cp_sum;
             int fft_size;
             bool padding; //if padding is enabled for fft and scs numbers.
             int start_pos = 0;

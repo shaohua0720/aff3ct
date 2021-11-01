@@ -28,9 +28,13 @@ namespace aff3ct
         }
 
         template <typename B>
-        Ofdm<B>::Ofdm(const int M, const int N, const bool padding) : Module(), M(M), N(N), padding(padding)
+        Ofdm<B>::Ofdm(const int M, const std::vector<int> cps, const int N,const bool padding) : 
+        Module(), 
+        M(M), 
+        N(N), 
+        padding(padding),
+        cp(cps)
         {
-
             const std::string name = "OFDM";
             this->set_name(name);
             this->set_short_name(name);
@@ -46,7 +50,7 @@ namespace aff3ct
                 fft_size = M;
             }
 
-            std::cout << "fft size:" << M << std::endl;
+            cp_sum = accumulate(cp.begin(), cp.end(), 0);
 
             fft_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
             fft_out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
@@ -60,22 +64,29 @@ namespace aff3ct
             // create related modulate and demodulates
             auto &p_mod = this->create_task("modulate");
             auto pin_X_K = this->template create_socket_in<B>(p_mod, "X_K", 2 * M * N); //std::complex<B> = 2*B
-            auto pin_Y_K = this->template create_socket_out<B>(p_mod, "Y_K", 2 * M * N);
+            auto pin_Y_K = this->template create_socket_out<B>(p_mod, "Y_K", 2 * M * N+2*cp_sum);
 
             this->create_codelet(p_mod, [pin_X_K, pin_Y_K](Module &m, Task &t, const size_t frame_id) -> int
                                  {
                                      auto &ofdm = static_cast<Ofdm<B> &>(m);
                                      B *in = static_cast<B *>(t[pin_X_K].get_dataptr());
                                      B *out = static_cast<B *>(t[pin_Y_K].get_dataptr());
+                                     ofdm.modulate(in,out);
                                      return status_t::SUCCESS;
                                  });
-        }
 
-        template <typename B>
-        void Ofdm<B>::setCPlength(std::vector<int> cp)
-        {
-            assert(cp.size() == N);
-            this->cp.insert(this->cp.begin(), cp.begin(), cp.end());
+            auto &p_demod = this->create_task("demodulate");
+            auto pin_X_K = this->template create_socket_in<B>(p_demod, "X_K", 2 * M * N+2*cp_sum);
+            auto pin_Y_K = this->template create_socket_out<B>(p_demod, "Y_K", 2 * M * N);
+
+            this->create_codelet(p_demod, [pin_X_K, pin_Y_K](Module &m, Task &t, const size_t frame_id) -> int
+                                 {
+                                     auto &ofdm = static_cast<Ofdm<B> &>(m);
+                                     B *in = static_cast<B *>(t[pin_X_K].get_dataptr());
+                                     B *out = static_cast<B *>(t[pin_Y_K].get_dataptr());
+                                     ofdm.demodulate(in,out);
+                                     return status_t::SUCCESS;
+                                 });
         }
 
         template <typename B>

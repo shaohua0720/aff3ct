@@ -213,7 +213,8 @@ int main(int argc, char **argv)
 	/******************************above code for test*************************************/
 
 
-	Ofdm<double> * ofdm = new Ofdm<double>(4,4);
+	std::vector<int> cp = {1,2,1,1};
+	Ofdm<double> * ofdm = new Ofdm<double>(4,cp,4);
 
 	std::cout<<"SRC:"<<std::endl;
 	double a[32] = {
@@ -230,9 +231,9 @@ int main(int argc, char **argv)
 	}
 	std::cout<<std::endl;
 
-	std::vector<int> cp = {1,2,1,1};
+	
 	// std::vector<int> cp = {0,0,0,0,};
-	ofdm->setCPlength(cp);
+	// ofdm->setCPlength(cp);
 
 	double x_out[42];
 	ofdm->modulate(a,x_out,1);
