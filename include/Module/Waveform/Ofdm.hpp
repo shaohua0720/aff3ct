@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <complex>
+#include <string>
 #include <fftw3.h>
 #include "Tools/Interface/Interface_set_seed.hpp"
 #include "Tools/Interface/Interface_is_done.hpp"
@@ -90,6 +91,8 @@ namespace aff3ct
         protected:
             void _fft(const B *X_K, B *Y_K);
             void _ifft(const B *X_K, B *Y_K);
+
+            void display_arrary(B* data, size_t size, const std::string info);
         };
     }
 

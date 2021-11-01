@@ -2,6 +2,8 @@
 #include "Module/Waveform/Ofdm.hpp"
 #include <numeric>
 #include <math.h>
+#include <string.h>
+#include <string>
 
 namespace aff3ct
 {
@@ -94,16 +96,29 @@ namespace aff3ct
         }
 
         template <typename B>
+        void Ofdm<B>::display_arrary(B *data, size_t size, const std::string info)
+        {
+            std::cout << std::endl
+                      << info << ":" << std::endl;
+            for (int i = 0; i < size; i++)
+            {
+                std::cout << data[i] << " ";
+            }
+            std::cout << std::endl;
+        }
+
+        template <typename B>
         void Ofdm<B>::modulate(const B *X_K, B *Y_K, int frame_id)
         {
-            B data[fft_size * sizeof(std::complex<B>)];
+            size_t B_w = sizeof(B);
+            B data[2 * fft_size];
             size_t pos = 0;
             for (size_t i = 0; i < N; i++)
             {
-                memset(data,0,fft_size*sizeof(std::complex<B>));
-                memcpy(data+start_pos,X_K + i * M * sizeof(std::complex<B>),M * sizeof(std::complex<B>));
-                this->_ifft(data, Y_K + pos + cp[i]);
-                memcpy(Y_K + pos, Y_K + pos + fft_size, cp[i] * sizeof(std::complex<B>)); //copy the cp
+                memset(data, 0, fft_size * 2 * B_w);
+                memcpy(data + 2 * start_pos * B_w, X_K + i * 2 * M, 2 * M * B_w);
+                this->_ifft(data, Y_K + 2 * pos + 2 * cp[i]);
+                memcpy(Y_K + pos * 2, Y_K + (pos + fft_size) * 2, cp[i] * 2 * B_w);
                 pos = pos + cp[i] + fft_size; //update the cursor
             }
         }
@@ -111,14 +126,15 @@ namespace aff3ct
         template <typename B>
         void Ofdm<B>::demodulate(const B *X_K, B *Y_K, int frame_id)
         {
-            B data[fft_size * sizeof(std::complex<B>)];
+            size_t B_w = sizeof(B);
+            B data[2 * fft_size];
             size_t pos = 0;
             for (size_t i = 0; i < N; i++)
             {
-                memset(data,0,fft_size*sizeof(std::complex<B>));
-                this->_fft(X_K + pos + cp[i], data); //discard cp
-                memcpy(Y_K + i * M * sizeof(std::complex<B>)+start_pos,data,M*sizeof(std::complex<B>));
-                pos = pos + cp[i] + fft_size;                                         //update the cursor
+                memset(data, 0, 2 * fft_size * B_w);
+                this->_fft(X_K + (pos + cp[i]) * 2, data); //discard cp
+                memcpy(Y_K + i * M * 2, data + start_pos * 2, 2*M * B_w);
+                pos = pos + cp[i] + fft_size; //update the cursor
             }
         }
     }
