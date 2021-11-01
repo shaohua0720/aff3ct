@@ -861,6 +861,9 @@
 #ifndef OFDM_HPP_
 #include <Module/Waveform/Ofdm.hpp>
 #endif
+#ifndef OTFS_HPP_
+#include <Module/Waveform/OTFS/Otfs.hpp>
+#endif
 #ifndef BIT_PACKER_HPP_
 #include <Tools/Algo/Bit_packer.hpp>
 #endif

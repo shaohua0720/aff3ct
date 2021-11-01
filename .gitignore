@@ -31,3 +31,5 @@ scripts/abi/db.json
 scripts/abi/db_summary.txt
 
 __pycache__/
+include/Module/.DS_Store
+src/Module/.DS_Store

@@ -63,27 +63,27 @@ namespace aff3ct
 
             // create related modulate and demodulates
             auto &p_mod = this->create_task("modulate");
-            auto pin_X_K = this->template create_socket_in<B>(p_mod, "X_K", 2 * M * N); //std::complex<B> = 2*B
-            auto pin_Y_K = this->template create_socket_out<B>(p_mod, "Y_K", 2 * M * N+2*cp_sum);
+            auto pmod_X_K = this->template create_socket_in<B>(p_mod, "X_K", 2 * M * N); //std::complex<B> = 2*B
+            auto pmod_Y_K = this->template create_socket_out<B>(p_mod, "Y_K", 2 * M * N+2*cp_sum);
 
-            this->create_codelet(p_mod, [pin_X_K, pin_Y_K](Module &m, Task &t, const size_t frame_id) -> int
+            this->create_codelet(p_mod, [pmod_X_K, pmod_Y_K](Module &m, Task &t, const size_t frame_id) -> int
                                  {
                                      auto &ofdm = static_cast<Ofdm<B> &>(m);
-                                     B *in = static_cast<B *>(t[pin_X_K].get_dataptr());
-                                     B *out = static_cast<B *>(t[pin_Y_K].get_dataptr());
+                                     B *in = static_cast<B *>(t[pmod_X_K].get_dataptr());
+                                     B *out = static_cast<B *>(t[pmod_Y_K].get_dataptr());
                                      ofdm.modulate(in,out);
                                      return status_t::SUCCESS;
                                  });
 
             auto &p_demod = this->create_task("demodulate");
-            auto pin_X_K = this->template create_socket_in<B>(p_demod, "X_K", 2 * M * N+2*cp_sum);
-            auto pin_Y_K = this->template create_socket_out<B>(p_demod, "Y_K", 2 * M * N);
+            auto pdemod_X_K = this->template create_socket_in<B>(p_demod, "X_K", 2 * M * N+2*cp_sum);
+            auto pdemod_Y_K = this->template create_socket_out<B>(p_demod, "Y_K", 2 * M * N);
 
-            this->create_codelet(p_demod, [pin_X_K, pin_Y_K](Module &m, Task &t, const size_t frame_id) -> int
+            this->create_codelet(p_demod, [pdemod_X_K, pdemod_Y_K](Module &m, Task &t, const size_t frame_id) -> int
                                  {
                                      auto &ofdm = static_cast<Ofdm<B> &>(m);
-                                     B *in = static_cast<B *>(t[pin_X_K].get_dataptr());
-                                     B *out = static_cast<B *>(t[pin_Y_K].get_dataptr());
+                                     B *in = static_cast<B *>(t[pdemod_X_K].get_dataptr());
+                                     B *out = static_cast<B *>(t[pdemod_Y_K].get_dataptr());
                                      ofdm.demodulate(in,out);
                                      return status_t::SUCCESS;
                                  });

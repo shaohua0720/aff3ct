@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SRC_DIR=".\/include"
+SRC_DIR=".\/include\/"
 if [ -z "$1" ]; then
   AFF3CT_HEADER=.\/include\/aff3ct.hpp
 else
