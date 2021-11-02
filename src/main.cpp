@@ -51,7 +51,7 @@ void print_version()
 #else
 	std::string compiler_version = std::to_string(__ICC);
 #endif
-	compiler_version = compiler_version.substr(0,2) + "." + compiler_version.substr(2,compiler_version.size());
+	compiler_version = compiler_version.substr(0, 2) + "." + compiler_version.substr(2, compiler_version.size());
 #elif defined(__clang__) || defined(__llvm__)
 	std::string compiler = "clang++";
 	std::string compiler_version = std::to_string(__clang_major__);
@@ -132,24 +132,24 @@ void print_version()
 #endif
 
 	std::cout << "aff3ct (" << os << prec << ", " << compiler << "-" << compiler_version << ", "
-	          << mipp::InstructionFullType << ") " << affect_version << std::endl;
-	std::cout << "Compilation options:"                                                        << std::endl;
-	std::cout << "  - Precision:         " << precision                                        << std::endl;
-	std::cout << "  - Polar bit packing: " << bit_packing                                      << std::endl;
-	std::cout << "  - Polar bounds:      " << polar_bounds                                     << std::endl;
-	std::cout << "  - Terminal colors:   " << terminal_colors                                  << std::endl;
-	std::cout << "  - Backtrace:         " << backtrace                                        << std::endl;
-	std::cout << "  - External strings:  " << ext_strings                                      << std::endl;
-	std::cout << "  - MPI:               " << mpi                                              << std::endl;
-	std::cout << "  - GSL:               " << gsl                                              << std::endl;
-	std::cout << "  - MKL:               " << mkl                                              << std::endl;
-	std::cout << "Copyright (c) 2016-2021 - MIT license."                                      << std::endl;
-	std::cout << "This is free software; see the source for copying conditions.  There is NO"  << std::endl;
+			  << mipp::InstructionFullType << ") " << affect_version << std::endl;
+	std::cout << "Compilation options:" << std::endl;
+	std::cout << "  - Precision:         " << precision << std::endl;
+	std::cout << "  - Polar bit packing: " << bit_packing << std::endl;
+	std::cout << "  - Polar bounds:      " << polar_bounds << std::endl;
+	std::cout << "  - Terminal colors:   " << terminal_colors << std::endl;
+	std::cout << "  - Backtrace:         " << backtrace << std::endl;
+	std::cout << "  - External strings:  " << ext_strings << std::endl;
+	std::cout << "  - MPI:               " << mpi << std::endl;
+	std::cout << "  - GSL:               " << gsl << std::endl;
+	std::cout << "  - MKL:               " << mkl << std::endl;
+	std::cout << "Copyright (c) 2016-2021 - MIT license." << std::endl;
+	std::cout << "This is free software; see the source for copying conditions.  There is NO" << std::endl;
 	std::cout << "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE." << std::endl;
 	exit(EXIT_SUCCESS);
 }
 
-int read_arguments(const int argc, const char** argv, factory::Launcher &params)
+int read_arguments(const int argc, const char **argv, factory::Launcher &params)
 {
 	cli::Argument_handler ah(argc, argv);
 
@@ -168,7 +168,7 @@ int read_arguments(const int argc, const char** argv, factory::Launcher &params)
 		params.store(arg_vals);
 		ah.set_help_display_keys(params.display_keys);
 	}
-	catch(std::exception&)
+	catch (std::exception &)
 	{
 		display_help = true;
 	}
@@ -181,11 +181,13 @@ int read_arguments(const int argc, const char** argv, factory::Launcher &params)
 		arg_group["sim"] = "Simulation parameter(s)";
 		ah.print_help(args, arg_group, params.display_adv_help);
 
-		if (cmd_error.size()) std::cerr << std::endl;
+		if (cmd_error.size())
+			std::cerr << std::endl;
 		for (auto w = 0; w < (int)cmd_error.size(); w++)
 			std::cerr << rang::tag::error << cmd_error[w] << std::endl;
 
-		if (cmd_warn.size()) std::cerr << std::endl;
+		if (cmd_warn.size())
+			std::cerr << std::endl;
 		for (auto w = 0; w < (int)cmd_warn.size(); w++)
 			std::cerr << rang::tag::warning << cmd_warn[w] << std::endl;
 	}
@@ -212,66 +214,107 @@ int main(int argc, char **argv)
 
 	/******************************above code for test*************************************/
 
+	// std::vector<int> cp = {1,2,1,1};
+	// Ofdm<double> * ofdm = new Ofdm<double>(4,cp,4);
 
-	std::vector<int> cp = {1,2,1,1};
-	Ofdm<double> * ofdm = new Ofdm<double>(4,cp,4);
+	// std::cout<<"SRC:"<<std::endl;
+	// double a[32] = {
+	// 	1.8033 , 1.7566,  0.1786 , 0.1893  , 2.9690 , 1.6081 ,  1.9659 , 1.6188,
+	// 	0.2790 , 0.4408 ,  2.7060 , 2.4935  , 2.3315 , 3.8310 ,  0.9028 , 3.5956,
+	// 	2.2513 , 2.1817 ,  0.2105 , 3.8126  , 2.3930 , 0.3826 ,  0.8399 , 4.3001,
+	// 	0.5263 , 2.2085 ,  1.9261 , 4.9663  , 2.5478 , 0.2753 ,  1.5197 , 3.6756
+	// 	};
 
-	std::cout<<"SRC:"<<std::endl;
+	// for (int i = 0; i < 32; )
+	// {
+	// 	std::cout<<"("<<a[i]<<","<<a[i+1]<<")"<<" ";
+	// 	i+=2;
+	// }
+	// std::cout<<std::endl;
+
+	// // std::vector<int> cp = {0,0,0,0,};
+	// // ofdm->setCPlength(cp);
+
+	// double x_out[42];
+	// ofdm->modulate(a,x_out,1);
+
+	// std::cout<<"IFFT:"<<std::endl;
+	// for(size_t i = 0; i < 42;)
+	// {
+	// 	std::cout<<"("<<x_out[i]/2<<","<<x_out[i+1]/2<<")"<<" ";
+	// 	i+=2;
+	// }
+	// std::cout<<std::endl;
+	// // double b[32] = {
+	// // 	6.9168,5.1728,-2.5952,1.9358, 2.6278,1.5566,0.2638,-1.6388,
+	// // 	6.2193,10.3609,-3.1546,-5.1934,-0.9983,-1.8173,-0.9504,-1.587,
+	// // 	5.6947,10.677,-0.6292,2.4285,3.5939,-5.5484,0.3458,1.1697,
+	// // 	6.5199,11.1257,-0.7308,1.5268,-0.3717,-6.1581,-3.3122,2.3396
+	// // };
+	// double c_out[32];
+	// ofdm->demodulate(x_out,c_out,1);
+
+	// std::cout<<"FFT:"<<std::endl;
+	// for(size_t i = 0; i < 32; )
+	// {
+	// 	std::cout<<"("<<c_out[i]/4<<","<<c_out[i+1]/4<<")"<<" ";
+	// 	i+=2;
+	// }
+	// std::cout<<std::endl;
+	// return 0;
+	/******************************** above for test **************************/
+	// double a[32] = {
+	// 	1.8033, 1.7566, 0.1786, 0.1893, 2.9690, 1.6081, 1.9659, 1.6188,
+	// 	0.2790, 0.4408, 2.7060, 2.4935, 2.3315, 3.8310, 0.9028, 3.5956,
+	// 	2.2513, 2.1817, 0.2105, 3.8126, 2.3930, 0.3826, 0.8399, 4.3001,
+	// 	0.5263, 2.2085, 1.9261, 4.9663, 2.5478, 0.2753, 1.5197, 3.6756};
 	double a[32] = {
-		1.8033 , 1.7566,  0.1786 , 0.1893  , 2.9690 , 1.6081 ,  1.9659 , 1.6188,
-		0.2790 , 0.4408 ,  2.7060 , 2.4935  , 2.3315 , 3.8310 ,  0.9028 , 3.5956,
-		2.2513 , 2.1817 ,  0.2105 , 3.8126  , 2.3930 , 0.3826 ,  0.8399 , 4.3001,
-		0.5263 , 2.2085 ,  1.9261 , 4.9663  , 2.5478 , 0.2753 ,  1.5197 , 3.6756
-		};
+		3.5468 , 4.4545,   3.2755 , 0.7465,   4.7987 , 4.0714,   3.7563 , 0.9830,
+		3.7734 , 4.7965,   0.8131 , 1.2875,   1.7019 , 1.2176,   1.2755 , 1.2554,
+		1.3801 , 2.7361,   0.5950 , 4.2036,   2.9263 , 4.6463,   2.5298 , 3.0802,
+		3.3985 , 0.6931,   2.4918 , 1.2714,   1.1191 , 1.7499,   3.4954 , 2.3664
+	};
 	
+	std::cout << "SRC:"<<std::endl;
 	for (int i = 0; i < 32; )
 	{
 		std::cout<<"("<<a[i]<<","<<a[i+1]<<")"<<" ";
 		i+=2;
 	}
+
+	std::vector<int> cp = {1, 2, 2, 1};
+	Otfs<double> *otfs = new Otfs<double>(4, cp, 4);
+	double b[42];
+	otfs->modulate(a, b);
+
 	std::cout<<std::endl;
-
-	
-	// std::vector<int> cp = {0,0,0,0,};
-	// ofdm->setCPlength(cp);
-
-	double x_out[42];
-	ofdm->modulate(a,x_out,1);
-
-	std::cout<<"IFFT:"<<std::endl;
-	for(size_t i = 0; i < 42;)
+	std::cout<<"Modulated:"<<std::endl;
+	for(size_t i = 0; i < 44;)
 	{
-		std::cout<<"("<<x_out[i]/2<<","<<x_out[i+1]/2<<")"<<" ";
+		std::cout<<"("<<b[i]<<","<<b[i+1]<<")"<<" ";
 		i+=2;
 	}
-	std::cout<<std::endl;
-	// double b[32] = {
-	// 	6.9168,5.1728,-2.5952,1.9358, 2.6278,1.5566,0.2638,-1.6388,
-	// 	6.2193,10.3609,-3.1546,-5.1934,-0.9983,-1.8173,-0.9504,-1.587,
-	// 	5.6947,10.677,-0.6292,2.4285,3.5939,-5.5484,0.3458,1.1697,
-	// 	6.5199,11.1257,-0.7308,1.5268,-0.3717,-6.1581,-3.3122,2.3396
-	// };
-	double c_out[32];
-	ofdm->demodulate(x_out,c_out,1);
+	double c[32];
+	otfs->demodulate(b,c);
 
-	std::cout<<"FFT:"<<std::endl;
-	for(size_t i = 0; i < 32; )
+	std::cout<<std::endl;
+	std::cout<<"Demodulated"<<std::endl;	
+	for(size_t i = 0; i < 32;)
 	{
-		std::cout<<"("<<c_out[i]/4<<","<<c_out[i+1]/4<<")"<<" ";
+		std::cout<<"("<<c[i]/64<<","<<c[i+1]/64<<")"<<" ";
 		i+=2;
 	}
-	std::cout<<std::endl;
+
 	return 0;
-/******************************** above for test **************************/
-	
-/******************************** above for test **************************/
+
+	/******************************** above for test **************************/
 	int exit_code = EXIT_SUCCESS;
 #ifdef AFF3CT_MPI
 	MPI_Init(nullptr, nullptr);
 #endif
 
 	factory::Launcher params("sim");
-	if (read_arguments(argc, (const char**)argv, params) == EXIT_FAILURE)
+	if (read_arguments(argc, (const char **)argv, params) == EXIT_FAILURE)
 		return EXIT_FAILURE;
 
 	try
@@ -280,14 +323,24 @@ int main(int argc, char **argv)
 #ifdef AFF3CT_MULTI_PREC
 		switch (params.sim_prec)
 		{
-			case  8: launcher = params.build<B_8, R_8, Q_8 >(argc, (const char**)argv); break;
-			case 16: launcher = params.build<B_16,R_16,Q_16>(argc, (const char**)argv); break;
-			case 32: launcher = params.build<B_32,R_32,Q_32>(argc, (const char**)argv); break;
-			case 64: launcher = params.build<B_64,R_64,Q_64>(argc, (const char**)argv); break;
-			default: launcher = nullptr; break;
+		case 8:
+			launcher = params.build<B_8, R_8, Q_8>(argc, (const char **)argv);
+			break;
+		case 16:
+			launcher = params.build<B_16, R_16, Q_16>(argc, (const char **)argv);
+			break;
+		case 32:
+			launcher = params.build<B_32, R_32, Q_32>(argc, (const char **)argv);
+			break;
+		case 64:
+			launcher = params.build<B_64, R_64, Q_64>(argc, (const char **)argv);
+			break;
+		default:
+			launcher = nullptr;
+			break;
 		}
 #else
-		launcher = params.build<B,R,Q>(argc, (const char**)argv);
+		launcher = params.build<B, R, Q>(argc, (const char **)argv);
 #endif
 		if (launcher != nullptr)
 		{
@@ -295,7 +348,7 @@ int main(int argc, char **argv)
 			delete launcher;
 		}
 	}
-	catch(std::exception const& e)
+	catch (std::exception const &e)
 	{
 		rang::format_on_each_line(std::cerr, std::string(e.what()) + "\n", rang::tag::error);
 	}

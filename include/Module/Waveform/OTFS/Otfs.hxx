@@ -1,6 +1,5 @@
 #include "Module/Waveform/OTFS/Otfs.hpp"
 #include <complex>
-#include <eigen3/Eigen/Eigen>
 #include <string>
 #include <iostream>
 
@@ -41,15 +40,17 @@ namespace aff3ct
         template <typename B>
         void Otfs<B>::modulate(const B *X_K, B *Y_K,int frame_id)
         {
-            B data[this->M*this->N*sizeof(fftw_complex)];
+            size_t count = this->M*this->N*sizeof(fftw_complex);
+            B data[count];
             this->_isfft(X_K,data); // ISFFT transform
-            this->_ifft(data,Y_K); // Heisenberg transform
+            this->display_arrary(data,count/sizeof(B),"ISFFT:");
+            this->_modulate(data,Y_K,frame_id); // Heisenberg transform
         }
         template <typename B>
         void Otfs<B>::demodulate(const B *X_K, B *Y_K,int frame_id)
         {
             B data[this->M*this->N*sizeof(fftw_complex)];
-            this->_fft(X_K,data);  //wiener transform 
+            this->_demodulate(X_K,data,frame_id);  //wiener transform 
             this->_sfft(data,Y_K);  // SFFT transform
         }
 
@@ -70,5 +71,7 @@ namespace aff3ct
             memcpy(Y_K,sfft_data_inplace,this->M*this->N*sizeof(fftw_complex));
         }
     }
-
 }
+
+#include "Tools/types.h"
+template class aff3ct::module::Otfs<Q_64>;
