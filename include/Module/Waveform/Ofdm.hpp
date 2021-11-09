@@ -55,7 +55,7 @@ namespace aff3ct
         // template <typename B>
         // using cplx = _cpl_union<B>;
 
-        template <typename B = double>
+        template <typename B = float>
         class Ofdm : public Module
         {
         public:
@@ -82,10 +82,10 @@ namespace aff3ct
             int start_pos = 0;
             int end_pos = M - 1;
 
-            fftw_plan fft_plan;
-            fftw_complex *fft_in, *fft_out;
-            fftw_plan ifft_plan;
-            fftw_complex *ifft_in, *ifft_out;
+            fftwf_plan fft_plan;
+            fftwf_complex *fft_in, *fft_out;
+            fftwf_plan ifft_plan;
+            fftwf_complex *ifft_in, *ifft_out;
 
         protected:
             void _fft(const B *X_K, B *Y_K);

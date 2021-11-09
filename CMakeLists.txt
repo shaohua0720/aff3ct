@@ -551,7 +551,8 @@ aff3ct_target_link_libraries(PUBLIC Threads::Threads)
 # FFTW3
 find_package(FFTW3 REQUIRED)
 aff3ct_target_include_directories2(PUBLIC "${FFTW3_INCLUDE_DIRS}")
-aff3ct_target_link_libraries(PUBLIC "${FFTW3_LIBRARIES}")
+# aff3ct_target_link_libraries(PUBLIC "${FFTW3_LIBRARIES}")
+aff3ct_target_link_libraries(PUBLIC "fftw3f")
 
 # Eigen3
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)

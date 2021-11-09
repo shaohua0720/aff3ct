@@ -9,17 +9,17 @@ namespace aff3ct
 {
 namespace module
 {
-    template <typename B = double>
+    template <typename B = float>
     class Otfs: public Ofdm<B>
     {
     private:
-        fftw_complex *isfft_data_inplace;
-        fftw_plan isfft_doppler;
-        fftw_plan isfft_delay;
+        fftwf_complex *isfft_data_inplace;
+        fftwf_plan isfft_doppler;
+        fftwf_plan isfft_delay;
 
-        fftw_complex *sfft_data_inplace;
-        fftw_plan sfft_doppler;
-        fftw_plan sfft_delay;
+        fftwf_complex *sfft_data_inplace;
+        fftwf_plan sfft_doppler;
+        fftwf_plan sfft_delay;
 
     public:
         Otfs(int M, const std::vector<int> cp, int N);

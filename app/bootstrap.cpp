@@ -85,12 +85,12 @@ struct modules
 void init_modules(const params &p, modules &m)
 {
     m.source = std::unique_ptr<module::Source_random<>>(new module::Source_random<>(p.infoLength));
-    m.encoder = std::unique_ptr<module::Encoder_repetition_sys<>>(new module::Encoder_repetition_sys<>(round(1/p.R),p.infoLength));
+    m.encoder = std::unique_ptr<module::Encoder_repetition_sys<>>(new module::Encoder_repetition_sys<>(p.infoLength,p.infoLength/p.R));
     m.cnstl = std::unique_ptr<tools::Constellation_QAM<>>(new tools::Constellation_QAM<>(p.bitPerSym));
     m.modem = std::unique_ptr<module::Modem_generic<>>(new module::Modem_generic<>(p.QAM,*m.cnstl));
     m.waveform = std::unique_ptr<module::Otfs<>>(new module::Otfs<>(p.nSCS,p.cp,p.N));
     m.channel = std::unique_ptr<module::Channel_AWGN_LLR<>>(new module::Channel_AWGN_LLR<>(p.N));
-    m.decoder = std::unique_ptr<module::Decoder_repetition_std<>>(new module::Decoder_repetition_std<>(round(1/p.R),p.infoLength));
+    m.decoder = std::unique_ptr<module::Decoder_repetition_std<>>(new module::Decoder_repetition_std<>(p.infoLength,p.infoLength/p.R));
     m.monitor = std::unique_ptr<module::Monitor_BFER<>>(new module::Monitor_BFER<>(p.infoLength, p.fe, p.numFrames));
 };
 
@@ -98,8 +98,10 @@ struct buffers
 {
     std::vector<int> ref_bits;
     std::vector<int> enc_bits;
-    std::vector<float> symbols;
+    std::vector<float> qam_symbols;
+    std::vector<float> otfs_mod_symbols;
     std::vector<float> noisy_symbols;
+    std::vector<float> otfs_demod_symbols;
     std::vector<float> LLRs;
     std::vector<int> dec_bits;
 };
@@ -109,8 +111,10 @@ void init_buffers(const params &p, buffers &b)
     int cnstl_sym = p.blockSize/p.bitPerSym;
     b.ref_bits = std::vector<int>(p.infoLength);
     b.enc_bits = std::vector<int>(p.blockSize);
-    b.symbols = std::vector<float>(cnstl_sym);
-    b.noisy_symbols = std::vector<float>(cnstl_sym);
+    b.qam_symbols = std::vector<float>(cnstl_sym);
+    b.otfs_mod_symbols = std::vector<float>(p.sample_rate/1000*2);
+    b.noisy_symbols = std::vector<float>(p.sample_rate/1000*2);
+    b.otfs_demod_symbols = std::vector<float>(cnstl_sym);
     b.LLRs = std::vector<float>(p.blockSize);
     b.dec_bits = std::vector<int>(p.infoLength);
 }
@@ -177,16 +181,17 @@ int main(int argc, char **argv)
         // display the performance (BER and FER) in real time (in a separate thread)
         u.terminal->start_temp_report();
 
-        const float chl_p = 0;
+        std::vector<float> chl_p = {sigma};
         // run the simulation chain
         while (!m.monitor->frame_limit_achieved() && !u.terminal->is_interrupt())
         {
             m.source->generate(b.ref_bits);
-            m.encoder->encode(b.ref_bits.data(), b.enc_bits.data());
-            m.modem->modulate(b.enc_bits.data(), b.symbols.data());
-            //m.channel->add_noise   (b.symbols,       b.noisy_symbols);
-            m.channel->add_noise(b.symbols.data(),b.symbols.data(),b.noisy_symbols.data());
-            m.modem->demodulate(b.noisy_symbols.data(),b.noisy_symbols.data(), b.LLRs.data());
+            m.encoder->encode(b.ref_bits, b.enc_bits);
+            m.modem->modulate(b.enc_bits, b.qam_symbols);
+            m.waveform->modulate(b.qam_symbols.data(), b.otfs_mod_symbols.data());
+            m.channel->add_noise(chl_p,b.otfs_mod_symbols,b.noisy_symbols);
+            m.waveform->demodulate(b.noisy_symbols.data(),b.otfs_demod_symbols.data());
+            m.modem->demodulate(chl_p,b.otfs_demod_symbols,b.LLRs);
             m.decoder->decode_siho(b.LLRs, b.dec_bits);
             m.monitor->check_errors(b.dec_bits, b.ref_bits);
         }

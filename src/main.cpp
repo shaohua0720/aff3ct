@@ -268,7 +268,7 @@ int main(int argc, char **argv)
 	// 	0.2790, 0.4408, 2.7060, 2.4935, 2.3315, 3.8310, 0.9028, 3.5956,
 	// 	2.2513, 2.1817, 0.2105, 3.8126, 2.3930, 0.3826, 0.8399, 4.3001,
 	// 	0.5263, 2.2085, 1.9261, 4.9663, 2.5478, 0.2753, 1.5197, 3.6756};
-	double a[32] = {
+	float a[32] = {
 		3.5468 , 4.4545,   3.2755 , 0.7465,   4.7987 , 4.0714,   3.7563 , 0.9830,
 		3.7734 , 4.7965,   0.8131 , 1.2875,   1.7019 , 1.2176,   1.2755 , 1.2554,
 		1.3801 , 2.7361,   0.5950 , 4.2036,   2.9263 , 4.6463,   2.5298 , 3.0802,
@@ -283,8 +283,8 @@ int main(int argc, char **argv)
 	}
 
 	std::vector<int> cp = {1, 2, 2, 1};
-	Otfs<double> *otfs = new Otfs<double>(4, cp, 4);
-	double b[42];
+	Otfs<float> *otfs = new Otfs<float>(4, cp, 4);
+	float b[42];
 	otfs->modulate(a, b);
 
 	std::cout<<std::endl;
@@ -294,7 +294,7 @@ int main(int argc, char **argv)
 		std::cout<<"("<<b[i]<<","<<b[i+1]<<")"<<" ";
 		i+=2;
 	}
-	double c[32];
+	float c[32];
 	otfs->demodulate(b,c);
 
 	std::cout<<std::endl;

@@ -53,14 +53,14 @@ namespace aff3ct
 
             cp_sum = accumulate(cp.begin(), cp.end(), 0);
 
-            fft_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
-            fft_out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
+            fft_in = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * fft_size);
+            fft_out = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * fft_size);
 
-            ifft_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
-            ifft_out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * fft_size);
+            ifft_in = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * fft_size);
+            ifft_out = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * fft_size);
 
-            fft_plan = fftw_plan_dft_1d(fft_size, fft_in, fft_out, FFTW_FORWARD, FFTW_MEASURE);
-            ifft_plan = fftw_plan_dft_1d(fft_size, ifft_in, ifft_out, FFTW_BACKWARD, FFTW_MEASURE);
+            fft_plan = fftwf_plan_dft_1d(fft_size, fft_in, fft_out, FFTW_FORWARD, FFTW_MEASURE);
+            ifft_plan = fftwf_plan_dft_1d(fft_size, ifft_in, ifft_out, FFTW_BACKWARD, FFTW_MEASURE);
 
             // create related modulate and demodulates
             auto &p_mod = this->create_task("modulate");
@@ -93,12 +93,12 @@ namespace aff3ct
         template <typename B>
         Ofdm<B>::~Ofdm()
         {
-            fftw_destroy_plan(fft_plan); // destroy the fftw
-            fftw_destroy_plan(ifft_plan);
-            fftw_free(fft_in);
-            fftw_free(fft_out);
-            fftw_free(ifft_in);
-            fftw_free(ifft_out);
+            fftwf_destroy_plan(fft_plan); // destroy the fftw
+            fftwf_destroy_plan(ifft_plan);
+            fftwf_free(fft_in);
+            fftwf_free(fft_out);
+            fftwf_free(ifft_in);
+            fftwf_free(ifft_out);
         }
 
         template <typename B>
