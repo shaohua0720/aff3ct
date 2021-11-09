@@ -8,12 +8,16 @@ using namespace aff3ct;
 
 struct params
 {
+    int   M         = 256;     // number of subcarriers
+    int   N         =  28;     // number of time domain symbols
+    int   QAM       =  16;     // QAM modulation order
+    int   bitPerSym;           // bits per symbol
 	int   K         =  32;     // number of information bits
-	int   N         = 128;     // codeword size
+	int   codesize  = 128;     // codeword size
 	int   fe        = 100;     // number of frame errors
 	int   seed      =   0;     // PRNG seed for the AWGN channel
 	float ebn0_min  =   0.00f; // minimum SNR value
-	float ebn0_max  =  10.01f; // maximum SNR value
+	float ebn0_max  =  10.00f; // maximum SNR value
 	float ebn0_step =   1.00f; // SNR step
 	float R;                   // code rate (R=K/N)
 };
@@ -24,6 +28,7 @@ struct modules
 	std::unique_ptr<module::Source_random<>>          source;
 	std::unique_ptr<module::Encoder_repetition_sys<>> encoder;
 	std::unique_ptr<module::Modem_BPSK<>>             modem;
+    std::unique_ptr<module::Otfs<>>                   waveform;
 	std::unique_ptr<module::Channel_AWGN_LLR<>>       channel;
 	std::unique_ptr<module::Decoder_repetition_std<>> decoder;
 	std::unique_ptr<module::Monitor_BFER<>>           monitor;
@@ -87,13 +92,13 @@ int main(int argc, char** argv)
 		u.terminal->start_temp_report();
 
 		// run the simulation chain
-		while (!m.monitor->fe_limit_achieved() && !u.terminal->is_interrupt())
+		while (!m.monitor->frame_limit_achieved() && !u.terminal->is_interrupt())
 		{
 			m.source ->generate    (                 b.ref_bits     );
 			m.encoder->encode      (b.ref_bits,      b.enc_bits     );
 			m.modem  ->modulate    (b.enc_bits,      b.symbols      );
 			//m.channel->add_noise   (b.symbols,       b.noisy_symbols);
-			//m.modem  ->demodulate  (b.noisy_symbols, b.LLRs         );
+			m.modem  ->demodulate  (b.noisy_symbols, b.LLRs         );
 			m.decoder->decode_siho (b.LLRs,          b.dec_bits     );
 			m.monitor->check_errors(b.dec_bits,      b.ref_bits     );
 		}
