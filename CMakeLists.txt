@@ -17,6 +17,7 @@ project(aff3ct)
 
 
 option(AFF3CT_COMPILE_EXE        "Compile the executable"                                                   ON )
+option(AFF3CT_COMPILE_APP        "Compile the user-defined applications"                                    ON )
 option(AFF3CT_COMPILE_STATIC_LIB "Compile the static library"                                               OFF)
 option(AFF3CT_COMPILE_SHARED_LIB "Compile the shared library"                                               OFF)
 option(AFF3CT_LINK_GSL           "Link with the GSL library (used in the channels)"                         OFF)
@@ -28,7 +29,7 @@ option(AFF3CT_POLAR_BOUNDS       "Enable the use of the external Tal & Vardy Pol
 option(AFF3CT_COLORS             "Enable the colors in the terminal"                                        ON )
 option(AFF3CT_OVERRIDE_VERSION   "Compile without .git directory, provided a version and hash"              OFF)
 
-if (AFF3CT_COMPILE_EXE OR AFF3CT_COMPILE_STATIC_LIB OR AFF3CT_COMPILE_SHARED_LIB)
+if (AFF3CT_COMPILE_EXE OR AFF3CT_COMPILE_STATIC_LIB OR AFF3CT_COMPILE_SHARED_LIB OR AFF3CT_COMPILE_APP)
     set(AFF3CT_COMPILE_OBJ ON)
 else()
     set(AFF3CT_COMPILE_OBJ OFF)
@@ -78,7 +79,18 @@ set(LIBRARY_OUTPUT_PATH lib/)
 
 # Generate the source files list
 file(GLOB_RECURSE source_files ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
+#file(GLOB_RECURSE app_dist_files ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
+file(GLOB_RECURSE main_file ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+list(REMOVE_ITEM source_files ${main_file})
 
+file(GLOB_RECURSE app_files ${CMAKE_CURRENT_SOURCE_DIR}/app/*)
+
+foreach(FILE_PATH IN ITEMS ${app_files})
+    STRING(REGEX REPLACE ".+/(.+)\\..*" "\\1" app_bin ${FILE_PATH})
+    list(APPEND app_bins ${app_bin})
+endforeach()
+
+# message(${app_bins})
 # ---------------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------------------ GET VERSION FROM GIT
 # ---------------------------------------------------------------------------------------------------------------------
@@ -210,12 +222,23 @@ endif()
 
 # Binary
 if(AFF3CT_COMPILE_EXE)
-    add_executable(aff3ct-bin $<TARGET_OBJECTS:aff3ct-obj> $<TARGET_OBJECTS:cli-obj>)
+    add_executable(aff3ct-bin $<TARGET_OBJECTS:aff3ct-obj> $<TARGET_OBJECTS:cli-obj> ${main_file})
     set_target_properties(aff3ct-bin PROPERTIES
                                      OUTPUT_NAME aff3ct-${AFF3CT_VERSION_FULL}
                                      POSITION_INDEPENDENT_CODE ON) # set -fpie
     message(STATUS "AFF3CT - Compile: executable")
 endif(AFF3CT_COMPILE_EXE)
+
+# User-defined Apps
+if(AFF3CT_COMPILE_APP)
+    foreach(app_file IN ITEMS ${app_files})
+        STRING(REGEX REPLACE ".+/(.+)\\..*" "\\1" app_target ${app_file})
+        add_executable(${app_target} $<TARGET_OBJECTS:aff3ct-obj> $<TARGET_OBJECTS:cli-obj> ${app_file})
+        set_target_properties(${app_target} PROPERTIES
+                                     OUTPUT_NAME app-${app_target}
+                                     POSITION_INDEPENDENT_CODE ON) # set -fpie
+    endforeach()
+endif(AFF3CT_COMPILE_APP)
 
 # Library
 if(AFF3CT_COMPILE_SHARED_LIB)
@@ -225,6 +248,7 @@ if(AFF3CT_COMPILE_SHARED_LIB)
                                             POSITION_INDEPENDENT_CODE ON) # set -fpic
     message(STATUS "AFF3CT - Compile: shared library")
 endif(AFF3CT_COMPILE_SHARED_LIB)
+
 if(AFF3CT_COMPILE_STATIC_LIB)
     add_library(aff3ct-static-lib STATIC $<TARGET_OBJECTS:aff3ct-obj> $<TARGET_OBJECTS:cli-obj>)
     set_target_properties(aff3ct-static-lib PROPERTIES
@@ -245,6 +269,11 @@ endif()
 macro(aff3ct_target_compile_definitions privacy def)
     if(AFF3CT_COMPILE_OBJ)
         target_compile_definitions(aff3ct-obj ${privacy} $<BUILD_INTERFACE:${def}> $<INSTALL_INTERFACE:${def}>)
+    endif()
+    if(AFF3CT_COMPILE_APP)
+        foreach(app_bin IN ITEMS ${app_bins})
+            target_compile_definitions(${app_bin} ${privacy} $<BUILD_INTERFACE:${def}> $<INSTALL_INTERFACE:${def}>)
+        endforeach()
     endif()
     if(AFF3CT_COMPILE_EXE)
         target_compile_definitions(aff3ct-bin ${privacy} $<BUILD_INTERFACE:${def}> $<INSTALL_INTERFACE:${def}>)
@@ -330,6 +359,14 @@ macro(aff3ct_target_include_directories privacy dir_build dir_install)
                                    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir_build}/>
                                    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/aff3ct-${AFF3CT_VERSION_FULL}/${dir_install}>)
     endif()
+    if(AFF3CT_COMPILE_APP)
+        foreach(app_bin IN ITEMS ${app_bins})
+            target_include_directories(${app_bin} ${privacy}
+                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir_build}/>
+                $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/aff3ct-${AFF3CT_VERSION_FULL}/${dir_install}>)
+        endforeach(app_bin in items ${app_bins})
+    endif()
+
     if(AFF3CT_COMPILE_EXE)
         target_include_directories(aff3ct-bin ${privacy}
                                    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir_build}/>
@@ -350,6 +387,11 @@ endmacro()
 macro(aff3ct_target_include_directories2 privacy dir)
     if(AFF3CT_COMPILE_OBJ)
         target_include_directories(aff3ct-obj ${privacy} $<BUILD_INTERFACE:${dir}> $<INSTALL_INTERFACE:${dir}>)
+    endif()
+    if(AFF3CT_COMPILE_APP)
+        foreach(app_bin IN ITEMS ${app_bins})
+            target_include_directories(${app_bin} ${privacy} $<BUILD_INTERFACE:${dir}> $<INSTALL_INTERFACE:${dir}>)
+        endforeach()
     endif()
     if(AFF3CT_COMPILE_EXE)
         target_include_directories(aff3ct-bin ${privacy} $<BUILD_INTERFACE:${dir}> $<INSTALL_INTERFACE:${dir}>)
@@ -407,6 +449,11 @@ endif()
 # ---------------------------------------------------------------------------------------------------------------------
 
 macro(aff3ct_target_link_libraries privacy lib)
+    if(AFF3CT_COMPILE_APP)
+        foreach(app_bin IN ITEMS ${app_bins})
+            target_link_libraries(${app_bin} ${privacy} ${lib})
+        endforeach()
+    endif(AFF3CT_COMPILE_APP)
     if(AFF3CT_COMPILE_EXE)
         target_link_libraries(aff3ct-bin ${privacy} ${lib})
     endif(AFF3CT_COMPILE_EXE)
@@ -470,11 +517,21 @@ if(AFF3CT_MPI)
                 if(AFF3CT_COMPILE_EXE)
                     set_target_properties(aff3ct-bin PROPERTIES COMPILE_FLAGS ${MPI_CXX_COMPILE_FLAGS})
                 endif()
+                if(AFF3CT_COMPILE_APP)
+                    foreach(app_bin in items ${app_bins})
+                        set_target_properties(${app_bin} PROPERTIES COMPILE_FLAGS ${MPI_CXX_COMPILE_FLAGS})
+                    endforeach()
+                endif()
             endif(MPI_CXX_COMPILE_FLAGS)
 
             if(MPI_CXX_LINK_FLAGS)
                 if(AFF3CT_COMPILE_EXE)
                     set_target_properties(aff3ct-bin PROPERTIES LINK_FLAGS ${MPI_CXX_LINK_FLAGS})
+                endif()
+                if(AFF3CT_COMPILE_APP)
+                    foreach(app_bin in items ${app_bins})
+                        set_target_properties(${app_bin} PROPERTIES COMPILE_FLAGS ${MPI_CXX_COMPILE_FLAGS})
+                     endforeach()
                 endif()
             endif(MPI_CXX_LINK_FLAGS)
         else()
