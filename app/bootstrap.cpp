@@ -182,11 +182,11 @@ int main(int argc, char **argv)
         while (!m.monitor->frame_limit_achieved() && !u.terminal->is_interrupt())
         {
             m.source->generate(b.ref_bits);
-            m.encoder->encode(b.ref_bits, b.enc_bits);
-            m.modem->modulate(b.enc_bits, b.symbols);
+            m.encoder->encode(b.ref_bits.data(), b.enc_bits.data());
+            m.modem->modulate(b.enc_bits.data(), b.symbols.data());
             //m.channel->add_noise   (b.symbols,       b.noisy_symbols);
-            m.channel->add_noise(&chl_p,b.symbols.data(),b.noisy_symbols.data());
-            m.modem->demodulate(&chl_p,b.noisy_symbols.data(), b.LLRs.data());
+            m.channel->add_noise(b.symbols.data(),b.symbols.data(),b.noisy_symbols.data());
+            m.modem->demodulate(b.noisy_symbols.data(),b.noisy_symbols.data(), b.LLRs.data());
             m.decoder->decode_siho(b.LLRs, b.dec_bits);
             m.monitor->check_errors(b.dec_bits, b.ref_bits);
         }

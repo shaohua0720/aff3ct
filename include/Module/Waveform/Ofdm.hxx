@@ -4,6 +4,7 @@
 #include <math.h>
 #include <string.h>
 #include <string>
+#include <memory>
 
 namespace aff3ct
 {
@@ -133,7 +134,8 @@ namespace aff3ct
         void Ofdm<B>::_modulate(const B *X_K, B *Y_K, int frame_id)
         {
             size_t B_w = sizeof(B);
-            B data[2 * fft_size];
+            B* data = (B*)malloc(2 * fft_size * B_w);
+            //B data[2 * fft_size];
             size_t pos = 0;
             for (size_t i = 0; i < N; i++)
             {
@@ -143,13 +145,15 @@ namespace aff3ct
                 memcpy(Y_K + pos * 2, Y_K + (pos + fft_size) * 2, cp[i] * 2 * B_w);
                 pos = pos + cp[i] + fft_size; //update the cursor
             }
+            free(data);
         }
 
         template <typename B>
         void Ofdm<B>::_demodulate(const B *X_K, B *Y_K, int frame_id)
         {
             size_t B_w = sizeof(B);
-            B data[2 * fft_size];
+            B* data = (B*)malloc(2 * fft_size * B_w);
+            //B data[2 * fft_size];
             size_t pos = 0;
             for (size_t i = 0; i < N; i++)
             {
@@ -158,6 +162,7 @@ namespace aff3ct
                 memcpy(Y_K + i * M * 2, data + start_pos * 2, 2*M * B_w);
                 pos = pos + cp[i] + fft_size; //update the cursor
             }
+            free(data);
         }
     }
 }

@@ -41,17 +41,21 @@ namespace aff3ct
         void Otfs<B>::modulate(const B *X_K, B *Y_K,int frame_id)
         {
             size_t count = this->M*this->N*sizeof(fftw_complex);
-            B data[count];
+            B* data = (B*)malloc(count * sizeof(B));
+            //B data[count];
             this->_isfft(X_K,data); // ISFFT transform
             this->display_arrary(data,count/sizeof(B),"ISFFT:");
             this->_modulate(data,Y_K,frame_id); // Heisenberg transform
+            free(data);
         }
         template <typename B>
         void Otfs<B>::demodulate(const B *X_K, B *Y_K,int frame_id)
         {
-            B data[this->M*this->N*sizeof(fftw_complex)];
+            B* data = (B*)malloc(this->M * this->N * sizeof(fftw_complex));
+            //B data[this->M*this->N*sizeof(fftw_complex)];
             this->_demodulate(X_K,data,frame_id);  //wiener transform 
             this->_sfft(data,Y_K);  // SFFT transform
+            free(data);
         }
 
         template <typename B>
