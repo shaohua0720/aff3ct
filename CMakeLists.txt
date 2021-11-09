@@ -16,7 +16,7 @@ project(aff3ct)
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-option(AFF3CT_COMPILE_EXE        "Compile the executable"                                                   ON )
+option(AFF3CT_COMPILE_EXE        "Compile the executable"                                                   OFF)
 option(AFF3CT_COMPILE_APP        "Compile the user-defined applications"                                    ON )
 option(AFF3CT_COMPILE_STATIC_LIB "Compile the static library"                                               OFF)
 option(AFF3CT_COMPILE_SHARED_LIB "Compile the shared library"                                               OFF)
