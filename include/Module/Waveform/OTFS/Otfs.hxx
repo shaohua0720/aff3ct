@@ -40,8 +40,8 @@ namespace aff3ct
         template <typename B>
         void Otfs<B>::modulate(const B *X_K, B *Y_K,int frame_id)
         {
-            size_t count = this->M*this->N*sizeof(fftwf_complex);
-            B* data = (B*)malloc(count * sizeof(B));
+            size_t count = this->M* this->N * sizeof(fftwf_complex);
+            B* data = (B*)malloc(count);
             //B data[count];
             this->_isfft(X_K,data); // ISFFT transform
             this->display_arrary(data,count/sizeof(B),"ISFFT:");

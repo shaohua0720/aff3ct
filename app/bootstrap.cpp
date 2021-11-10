@@ -12,8 +12,8 @@ struct params
     int N = 14;                      // number of time domain symbols
 
     int scs = 15000;                 // Subcarrier spacing
-    int nFFT = 256;
-    int nSCS = 256;                  // number of SCS
+    int nFFT = 16;
+    int nSCS = 16;                  // number of SCS
     float cpRatio = 0.07;            // CP ratio for OFDM
 
     int crcLength = 24;              // CRC length
@@ -28,7 +28,7 @@ struct params
 
     float R = 0.5;                   // code rate (R=K/N)
 
-    int sample_rate = 3840000;          // sample rate
+    int sample_rate = 240000;          // sample rate
     int bitPerSym;                   // bits per symbol
     int blockSize;
     int infoLength;
@@ -87,9 +87,9 @@ void init_modules(const params &p, modules &m)
     m.source = std::unique_ptr<module::Source_random<>>(new module::Source_random<>(p.infoLength));
     m.encoder = std::unique_ptr<module::Encoder_repetition_sys<>>(new module::Encoder_repetition_sys<>(p.infoLength,p.infoLength/p.R));
     m.cnstl = std::unique_ptr<tools::Constellation_QAM<>>(new tools::Constellation_QAM<>(p.bitPerSym));
-    m.modem = std::unique_ptr<module::Modem_generic<>>(new module::Modem_generic<>(p.QAM,*m.cnstl));
+    m.modem = std::unique_ptr<module::Modem_generic<>>(new module::Modem_generic<>(p.blockSize,*m.cnstl));
     m.waveform = std::unique_ptr<module::Otfs<>>(new module::Otfs<>(p.nSCS,p.cp,p.N));
-    m.channel = std::unique_ptr<module::Channel_AWGN_LLR<>>(new module::Channel_AWGN_LLR<>(p.N));
+    m.channel = std::unique_ptr<module::Channel_AWGN_LLR<>>(new module::Channel_AWGN_LLR<>(p.sample_rate/1000*2));
     m.decoder = std::unique_ptr<module::Decoder_repetition_std<>>(new module::Decoder_repetition_std<>(p.infoLength,p.infoLength/p.R));
     m.monitor = std::unique_ptr<module::Monitor_BFER<>>(new module::Monitor_BFER<>(p.infoLength, p.fe, p.numFrames));
 };
@@ -111,10 +111,10 @@ void init_buffers(const params &p, buffers &b)
     int cnstl_sym = p.blockSize/p.bitPerSym;
     b.ref_bits = std::vector<int>(p.infoLength);
     b.enc_bits = std::vector<int>(p.blockSize);
-    b.qam_symbols = std::vector<float>(cnstl_sym);
+    b.qam_symbols = std::vector<float>(cnstl_sym*2);
     b.otfs_mod_symbols = std::vector<float>(p.sample_rate/1000*2);
     b.noisy_symbols = std::vector<float>(p.sample_rate/1000*2);
-    b.otfs_demod_symbols = std::vector<float>(cnstl_sym);
+    b.otfs_demod_symbols = std::vector<float>(cnstl_sym*2);
     b.LLRs = std::vector<float>(p.blockSize);
     b.dec_bits = std::vector<int>(p.infoLength);
 }
