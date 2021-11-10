@@ -284,7 +284,7 @@ int main(int argc, char **argv)
 
 	std::vector<int> cp = {1, 2, 2, 1};
 	Otfs<float> *otfs = new Otfs<float>(4, cp, 4);
-	float b[42];
+	float b[44];
 	otfs->modulate(a, b);
 
 	std::cout<<std::endl;
@@ -301,7 +301,7 @@ int main(int argc, char **argv)
 	std::cout<<"Demodulated"<<std::endl;	
 	for(size_t i = 0; i < 32;)
 	{
-		std::cout<<"("<<c[i]/64<<","<<c[i+1]/64<<")"<<" ";
+		std::cout<<"("<<c[i]<<","<<c[i+1]<<")"<<" ";
 		i+=2;
 	}
 

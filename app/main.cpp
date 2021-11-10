@@ -301,7 +301,7 @@ int main(int argc, char **argv)
 	std::cout<<"Demodulated"<<std::endl;	
 	for(size_t i = 0; i < 32;)
 	{
-		std::cout<<"("<<c[i]/64<<","<<c[i+1]/64<<")"<<" ";
+		std::cout<<"("<<c[i]<<","<<c[i+1]<<")"<<" ";
 		i+=2;
 	}
 
