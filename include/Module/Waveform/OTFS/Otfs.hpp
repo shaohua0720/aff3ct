@@ -4,6 +4,7 @@
 #include <Module/Waveform/Ofdm.hpp>
 #include <Tools/Math/matrix.h>
 #include <fftw3.h>
+#pragma comment(lib,"libfftw3f-3.lib")
 
 namespace aff3ct
 {

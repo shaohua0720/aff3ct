@@ -57,7 +57,7 @@ namespace aff3ct
             B* data = (B *)malloc(count);
             this->_demodulate(X_K,data,frame_id);  //Wiener transform 
             this->_sfft(data,Y_K);  // SFFT transform
-            this->normalize(Y_K, count/sizeof(B),this->M*sqrt(this->N));
+            this->normalize(Y_K, count/sizeof(B),1.0/(this->M*sqrt(this->N)));
             free(data);
         }
 

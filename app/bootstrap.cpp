@@ -8,7 +8,7 @@ using namespace aff3ct;
 
 struct params
 {
-    int M = 8;                     // number of SCSs
+    int M = 256;                     // number of SCSs
     int N = 14;                      // number of time domain symbols
 
     int scs = 15000;                 // Subcarrier spacing
@@ -175,7 +175,7 @@ int main(int argc, char **argv)
         const auto esn0 = tools::ebn0_to_esn0(ebn0, p.R);
         const auto sigma = tools::esn0_to_sigma(esn0);
 
-        u.noise->set_values(sigma, ebn0, esn0);
+        //u.noise->set_values(sigma, ebn0, esn0);
 
         // update the sigma of the modem and the channel
         //m.modem  ->set_noise(*u.noise);
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
         // display the performance (BER and FER) in real time (in a separate thread)
         u.terminal->start_temp_report();
 
-        std::vector<float> chl_p = {sigma};
+        std::vector<float> chl_p = {0.1};
         // run the simulation chain
         while (!m.monitor->frame_limit_achieved() && !u.terminal->is_interrupt())
         {
