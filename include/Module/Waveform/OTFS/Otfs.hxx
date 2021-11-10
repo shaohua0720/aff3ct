@@ -40,39 +40,52 @@ namespace aff3ct
         template <typename B>
         void Otfs<B>::modulate(const B *X_K, B *Y_K,int frame_id)
         {
-            size_t count = this->M* this->N * sizeof(fftwf_complex);
+            size_t count = this->M * this->N * sizeof(B) * 2;
             B* data = (B*)malloc(count);
             //B data[count];
             this->_isfft(X_K,data); // ISFFT transform
-            this->display_arrary(data,count/sizeof(B),"ISFFT:");
+            //this->display_arrary(data,count/sizeof(B),"ISFFT:");
             this->_modulate(data,Y_K,frame_id); // Heisenberg transform
             free(data);
+            this->normalize(Y_K, count);
         }
         template <typename B>
         void Otfs<B>::demodulate(const B *X_K, B *Y_K,int frame_id)
         {
-            B* data = (B*)malloc(this->M * this->N * sizeof(fftwf_complex));
+            size_t count = this->M * this->N * sizeof(B) * 2;
+            B* data = (B *)malloc(count);
             //B data[this->M*this->N*sizeof(fftw_complex)];
             this->_demodulate(X_K,data,frame_id);  //wiener transform 
             this->_sfft(data,Y_K);  // SFFT transform
+            //this->display_arrary(data, count / sizeof(B), "ISFFT:");
             free(data);
+            this->normalize(Y_K, count);
         }
 
         template <typename B>
         void Otfs<B>::_isfft(const B *X_K, B *Y_K) // IFFT for doppler(row), FFT for delay(col)
         {
-            memcpy(isfft_data_inplace,X_K,this->M*this->N*sizeof(fftwf_complex));
-            fftwf_execute(isfft_doppler);
+            memcpy(isfft_data_inplace,X_K,this->M*this->N*sizeof(B)*2);
             fftwf_execute(isfft_delay);
-            memcpy(Y_K,isfft_data_inplace,this->M*this->N*sizeof(fftwf_complex));
+            fftwf_execute(isfft_doppler);
+            memcpy(Y_K,isfft_data_inplace,this->M*this->N*sizeof(B)*2);
         }
         template <typename B>
         void Otfs<B>::_sfft(const B *X_K, B *Y_K) // FFT for doppler(row), IFFT for delay(col)
         {  
-            memcpy(sfft_data_inplace,X_K,this->M*this->N*sizeof(fftwf_complex));
+            memcpy(sfft_data_inplace,X_K,this->M*this->N*sizeof(B)*2);
             fftwf_execute(sfft_doppler);
             fftwf_execute(sfft_delay);
-            memcpy(Y_K,sfft_data_inplace,this->M*this->N*sizeof(fftwf_complex));
+            memcpy(Y_K,sfft_data_inplace,this->M*this->N*sizeof(B)*2);
+        }
+
+        template <typename B>
+        void Otfs<B>::normalize(B* Y_K, size_t count)
+        {
+            for (auto i = 0; i < count; i++)
+            {
+                Y_K[i] = Y_K[i] / sqrt(this->M * this->N * this->M);
+            }
         }
     }
 }

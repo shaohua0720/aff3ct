@@ -93,7 +93,7 @@ namespace aff3ct
             void _modulate(const B *X_K, B *Y_K,int frame_id = -1);
             void _demodulate(const B *X_K,  B *Y_K,int frame_id = -1);
 
-            void display_arrary(B* data, size_t size, const std::string info);
+            void display_arrary(const B* data, size_t size, const std::string info);
         };
     }
 

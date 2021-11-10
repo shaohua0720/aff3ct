@@ -8,12 +8,12 @@ using namespace aff3ct;
 
 struct params
 {
-    int M = 256;                     // number of SCSs
+    int M = 8;                     // number of SCSs
     int N = 14;                      // number of time domain symbols
 
     int scs = 15000;                 // Subcarrier spacing
-    int nFFT = 16;
-    int nSCS = 16;                  // number of SCS
+    int nFFT;
+
     float cpRatio = 0.07;            // CP ratio for OFDM
 
     int crcLength = 24;              // CRC length
@@ -28,9 +28,9 @@ struct params
 
     float R = 0.5;                   // code rate (R=K/N)
 
-    int sample_rate = 240000;          // sample rate
-    int bitPerSym;                   // bits per symbol
-    int blockSize;
+    int sample_rate = M*(N+1)*1000;        // sample rate
+    int bitsPerSym;                  // bits per symbol
+    int bitsPerFra;                  // bits per frame
     int infoLength;
     
     std::vector<int> cp;             // CP length of OFDM
@@ -38,15 +38,16 @@ struct params
 
 void init_params(params &p)
 {
-    p.bitPerSym = log2(p.QAM);
-    p.blockSize = p.M * p.N * p.bitPerSym;
-    p.infoLength = p.blockSize * p.R;
+    p.nFFT = pow(2,ceil(log2(p.M)));
+    p.bitsPerSym = log2(p.QAM);
+    p.bitsPerFra = p.M * p.N * p.bitsPerSym;
+    p.infoLength = p.bitsPerFra * p.R;
 
     int s_cp = 0;
     p.cp.resize(p.N);
     for (auto i = 0; i < p.N; i++)
     {
-        p.cp[i] = round(p.nFFT * p.cpRatio);
+        p.cp[i] = floor(p.nFFT * p.cpRatio);
         s_cp += p.cp[i];
     } 
 
@@ -62,7 +63,7 @@ void init_params(params &p)
     std::cout << "#    ** Frames in total  = " << p.numFrames << std::endl;
     std::cout << "#    ** Noise seed       = " << p.seed << std::endl;
     std::cout << "#    ** Info. bits (K)   = " << p.infoLength << std::endl;
-    std::cout << "#    ** Frame size       = " << p.blockSize << std::endl;
+    std::cout << "#    ** Frame size       = " << p.bitsPerFra << std::endl;
     std::cout << "#    ** Code rate  (R)   = " << p.R << std::endl;
     std::cout << "#    ** EbN0 min   (dB)  = " << p.ebn0_min << std::endl;
     std::cout << "#    ** EbN0 max   (dB)  = " << p.ebn0_max << std::endl;
@@ -85,12 +86,12 @@ struct modules
 void init_modules(const params &p, modules &m)
 {
     m.source = std::unique_ptr<module::Source_random<>>(new module::Source_random<>(p.infoLength));
-    m.encoder = std::unique_ptr<module::Encoder_repetition_sys<>>(new module::Encoder_repetition_sys<>(p.infoLength,p.infoLength/p.R));
-    m.cnstl = std::unique_ptr<tools::Constellation_QAM<>>(new tools::Constellation_QAM<>(p.bitPerSym));
-    m.modem = std::unique_ptr<module::Modem_generic<>>(new module::Modem_generic<>(p.blockSize,*m.cnstl));
-    m.waveform = std::unique_ptr<module::Otfs<>>(new module::Otfs<>(p.nSCS,p.cp,p.N));
-    m.channel = std::unique_ptr<module::Channel_AWGN_LLR<>>(new module::Channel_AWGN_LLR<>(p.sample_rate/1000*2));
-    m.decoder = std::unique_ptr<module::Decoder_repetition_std<>>(new module::Decoder_repetition_std<>(p.infoLength,p.infoLength/p.R));
+    m.encoder = std::unique_ptr<module::Encoder_repetition_sys<>>(new module::Encoder_repetition_sys<>(p.infoLength,p.bitsPerFra));
+    m.cnstl = std::unique_ptr<tools::Constellation_QAM<>>(new tools::Constellation_QAM<>(p.bitsPerSym));
+    m.modem = std::unique_ptr<module::Modem_generic<>>(new module::Modem_generic<>(p.bitsPerFra,*(m.cnstl)));
+    m.waveform = std::unique_ptr<module::Otfs<float>>(new module::Otfs<>(p.M,p.cp,p.N));
+    m.channel = std::unique_ptr<module::Channel_AWGN_LLR<float>>(new module::Channel_AWGN_LLR<float>(p.sample_rate/1000*2));
+    m.decoder = std::unique_ptr<module::Decoder_repetition_std<>>(new module::Decoder_repetition_std<>(p.infoLength,p.bitsPerFra));
     m.monitor = std::unique_ptr<module::Monitor_BFER<>>(new module::Monitor_BFER<>(p.infoLength, p.fe, p.numFrames));
 };
 
@@ -108,14 +109,16 @@ struct buffers
 
 void init_buffers(const params &p, buffers &b)
 {
-    int cnstl_sym = p.blockSize/p.bitPerSym;
+    int complex_syms = p.bitsPerFra/p.bitsPerSym;
+    int cpx2f_syms = complex_syms * 2; // including I and Q channel
+    int cpx2f_syms_w_cp = p.sample_rate / 1000 * 2; //
     b.ref_bits = std::vector<int>(p.infoLength);
-    b.enc_bits = std::vector<int>(p.blockSize);
-    b.qam_symbols = std::vector<float>(cnstl_sym*2);
-    b.otfs_mod_symbols = std::vector<float>(p.sample_rate/1000*2);
-    b.noisy_symbols = std::vector<float>(p.sample_rate/1000*2);
-    b.otfs_demod_symbols = std::vector<float>(cnstl_sym*2);
-    b.LLRs = std::vector<float>(p.blockSize);
+    b.enc_bits = std::vector<int>(p.bitsPerFra);
+    b.qam_symbols = std::vector<float>(cpx2f_syms);
+    b.otfs_mod_symbols = std::vector<float>(cpx2f_syms_w_cp);
+    b.noisy_symbols = std::vector<float>(cpx2f_syms_w_cp);
+    b.otfs_demod_symbols = std::vector<float>(cpx2f_syms);
+    b.LLRs = std::vector<float>(p.bitsPerFra);
     b.dec_bits = std::vector<int>(p.infoLength);
 }
 

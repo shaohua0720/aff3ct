@@ -108,13 +108,14 @@ namespace aff3ct
         }
 
         template <typename B>
-        void Ofdm<B>::display_arrary(B *data, size_t size, const std::string info)
+        void Ofdm<B>::display_arrary(const B *data, size_t size, const std::string info)
         {
             std::cout << std::endl
                       << info << ":" << std::endl;
-            for (int i = 0; i < size; i++)
+            for (int i = 0; i < size;)
             {
-                std::cout << data[i] << " ";
+                std::cout << i/2<<":("<<data[i] << ","<<data[i+1]<<") ";
+                i = i + 2;
             }
             std::cout << std::endl;
         }

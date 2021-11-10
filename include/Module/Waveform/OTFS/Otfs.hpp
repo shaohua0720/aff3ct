@@ -31,6 +31,7 @@ namespace module
     protected:
         void _isfft(const B *X_K, B *Y_K); // IFFT for doppler(row), FFT for delay(col)
         void _sfft(const B *X_K, B *Y_K); // FFT for doppler(row), IFFT for delay(col)
+        inline void normalize(B* Y_K, size_t count);
     };
     
 }
