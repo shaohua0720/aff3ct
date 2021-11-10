@@ -13,6 +13,9 @@ namespace aff3ct
             const std::string name = "OTFS";
             this->set_name(name);
 
+            for(auto i : cp)
+                cp_cplx += i;
+
             isfft_data_inplace = (fftwf_complex *)fftwf_malloc(M*N*sizeof(fftwf_complex));
             /*N-points IFFT for doppler*/
             isfft_doppler = fftwf_plan_many_dft(1,&N,M,isfft_data_inplace,NULL,M,1,isfft_data_inplace,NULL,M,1,FFTW_BACKWARD,FFTW_MEASURE);
@@ -42,24 +45,20 @@ namespace aff3ct
         {
             size_t count = this->M * this->N * sizeof(B) * 2;
             B* data = (B*)malloc(count);
-            //B data[count];
             this->_isfft(X_K,data); // ISFFT transform
-            //this->display_arrary(data,count/sizeof(B),"ISFFT:");
             this->_modulate(data,Y_K,frame_id); // Heisenberg transform
+            this->normalize(Y_K, count/sizeof(B)+cp_cplx*2,1.0/(this->M*this->N)*sqrt(this->N));
             free(data);
-            this->normalize(Y_K, count);
         }
         template <typename B>
         void Otfs<B>::demodulate(const B *X_K, B *Y_K,int frame_id)
         {
             size_t count = this->M * this->N * sizeof(B) * 2;
             B* data = (B *)malloc(count);
-            //B data[this->M*this->N*sizeof(fftw_complex)];
-            this->_demodulate(X_K,data,frame_id);  //wiener transform 
+            this->_demodulate(X_K,data,frame_id);  //Wiener transform 
             this->_sfft(data,Y_K);  // SFFT transform
-            //this->display_arrary(data, count / sizeof(B), "ISFFT:");
+            this->normalize(Y_K, count/sizeof(B),this->M*sqrt(this->N));
             free(data);
-            this->normalize(Y_K, count);
         }
 
         template <typename B>
@@ -80,11 +79,12 @@ namespace aff3ct
         }
 
         template <typename B>
-        void Otfs<B>::normalize(B* Y_K, size_t count)
+        void Otfs<B>::normalize(B* Y_K, size_t count,float weight)
         {
             for (auto i = 0; i < count; i++)
             {
-                Y_K[i] = Y_K[i] / sqrt(this->M * this->N * this->M);
+                //std::cout<<i<<":"<<Y_K[i]<<std::endl;
+                Y_K[i] = (B)(Y_K[i]*weight);
             }
         }
     }

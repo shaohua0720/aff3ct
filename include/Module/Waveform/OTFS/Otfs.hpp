@@ -21,6 +21,8 @@ namespace module
         fftwf_plan sfft_doppler;
         fftwf_plan sfft_delay;
 
+        int cp_cplx = 0;
+
     public:
         Otfs(int M, const std::vector<int> cp, int N);
         virtual ~Otfs();
@@ -31,7 +33,7 @@ namespace module
     protected:
         void _isfft(const B *X_K, B *Y_K); // IFFT for doppler(row), FFT for delay(col)
         void _sfft(const B *X_K, B *Y_K); // FFT for doppler(row), IFFT for delay(col)
-        inline void normalize(B* Y_K, size_t count);
+        void normalize(B* Y_K, size_t count,float weight);
     };
     
 }
