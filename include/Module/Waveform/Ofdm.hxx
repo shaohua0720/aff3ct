@@ -135,11 +135,13 @@ namespace aff3ct
         void Ofdm<B>::_modulate(const B *X_K, B *Y_K,int frame_id)
         {
             this->ofdm_modulate(X_K,Y_K,frame_id);
+            this->normalize(Y_K,(this->N*this->M+cp_sum)*2,1.0f/sqrt(M));
         }
         template <typename B>
         void Ofdm<B>::_demodulate(const B *X_K,  B *Y_K,int frame_id)
         {
             this->ofdm_demodulate(X_K,Y_K,frame_id);
+            this->normalize(Y_K,(this->N*this->M)*2,1.0f/sqrt(M));
         }
 
         template <typename B>
@@ -175,6 +177,16 @@ namespace aff3ct
                 pos = pos + cp[i] + fft_size; //update the cursor
             }
             free(data);
+        }
+
+        template <typename B>
+        void Ofdm<B>::normalize(B* Y_K, size_t count,float weight)
+        {
+            for (auto i = 0; i < count; i++)
+            {
+                //std::cout<<i<<":"<<Y_K[i]<<std::endl;
+                Y_K[i] = (B)(Y_K[i]*weight);
+            }
         }
     }
 }

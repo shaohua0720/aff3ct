@@ -96,6 +96,8 @@ namespace aff3ct
             void ofdm_modulate(const B *X_K, B *Y_K,int frame_id = -1);
             void ofdm_demodulate(const B *X_K,  B *Y_K,int frame_id = -1);
 
+            void normalize(B* Y_K, size_t count,float weight);
+
             void display_arrary(const B* data, size_t size, const std::string info);
         };
     }
