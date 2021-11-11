@@ -2,6 +2,7 @@
 #include <sstream>
 #include <string>
 #include <cmath>
+#include <complex>
 #include <assert.h>
 
 #include "Tools/Noise/Noise.hpp"
@@ -46,13 +47,15 @@ tools::Gaussian_gen<R> *create_gaussian_generator(const tools::Gaussian_noise_ge
 }
 
 template <typename R>
-Raytrace_Generic<R>::Raytrace_Generic(int N, channel_model model, int sample_rate, float RMSDelaySpread,
+Raytrace_Generic<R>::Raytrace_Generic(int N, channel_model model, int sample_rate, float RMSDelaySpread,float dopplerHz,
                                       const tools::Gaussian_noise_generator_implem implem,
-                                      int seed, bool gainNormalized) : Channel<R>(N), model(model), sample_rate(sample_rate),
+                                      int seed, bool gainNormalized) : Channel<R>(N), model(model), sample_rate(sample_rate),dopplerHz(dopplerHz),
                                                                        RMSDelaySpread(RMSDelaySpread), gainNormalized(gainNormalized),
                                                                        gaussian_generator(create_gaussian_generator<R>(implem, seed))
 {
+    this->initDelayGain();
 }
+
 template <typename R>
 void Raytrace_Generic<R>::initDelayGain()
 {
@@ -121,6 +124,7 @@ void Raytrace_Generic<R>::initDelayGain()
             i = i * this->RMSDelaySpread * 1e-9;
         }
     }
+
     if (gainNormalized)
     {
         auto power = 0.0;
@@ -131,7 +135,52 @@ void Raytrace_Generic<R>::initDelayGain()
         for (auto &i : this->pathGaindB)
         {
             auto t = std::pow(10, i / 10.0) / power;
+            this->pathGain.push_back(t);
             i = 10 * log10(t);
         }
     }
+
+    for(int i =0;i<this->numPath;i++)
+    {
+        std::mt19937 rd_engine;
+        std::uniform_real_distribution<double> angle_t(0,1.0);
+        std::normal_distribution<double> randn(0, 1);
+
+        auto angle = angle_t(rd_engine)*2*M_PI;
+        std::cout << "################" << angle << std::endl;
+        this->AoA.push_back(angle);
+        this->pathDoppler.push_back(this->dopplerHz*cos(angle));
+        this->pathOffset.push_back(2*M_PI*angle_t(rd_engine));
+
+        std::complex<double> gain = this->sqrt(pathGain[i])/sqrt(2.0)*std::complex<double>(randn(rd_engine),randn(rd_engine));
+        std::cout<<"############## complex gain:"<<gain<<" ";
+        this->pathRayleighGain.push_back(gain);
+    }
+
+    for(auto& i : this->delayProfile)
+    {
+        this->delayInSample.push_back(floor(i/this->sample_rate)); //floor or ceil or round
+        i = this->delayInSample.back()*this->sample_rate;
+    }
+}
+
+template <typename R>
+void Raytrace_Generic<R>::_add_noise(const float *CP, const R *X_N, R *Y_N, const size_t frame_id)
+{
+    std::cout << "-------- num of "<<this->N<<" real number in total"<<std::endl;
+    for(size_t i =0;i<this->N;)
+    {
+        std::complex<R> out_point(0,0);
+        std::complex<R> in_point = std::complex<R>(X_N[i],X_N[i+1]);
+        for(auto j =0;j< this->numPath;j++)
+        {
+            auto time = (i/2-this->delayInSample[j])/this->sample_rate+this->initialTime;
+            auto phase = exp(std::complex<double>(0,2*M_PI*(this->pathDoppler[j]*time+this->pathOffset[j])));
+            out_point += this->pathRayleighGain[j]*phase*in_point;
+        }
+        Y_N[i]=out_point.real();
+        Y_N[i+1]=out_point.imag();
+        i+=2;
+    }
+    this->initialTime+=this->N/2;
 }
