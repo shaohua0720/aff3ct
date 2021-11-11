@@ -39,7 +39,7 @@ for f in $headers; do
     echo $guard >> $AFF3CT_HEADER # add a guard to the header file to accelerate compilation
     rc=$?; if [[ $rc != 0 ]]; then echo "No #ifndef in file '$f'."; exit 1; fi
 
-    echo $f | sed "s/$SRC_DIR\//#include </" | # change "./src" with "#include <"
+    echo $f | sed "s/$SRC_DIR/\#include </" | # change "./src" with "#include <"
     sed 's|$|>|g' >> $AFF3CT_HEADER # add at the end of each line the ">" to close the 'include'
     echo "#endif" >> $AFF3CT_HEADER # close the guard
   fi

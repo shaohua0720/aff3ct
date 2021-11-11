@@ -261,6 +261,9 @@
 #ifndef CHANNEL_RAYLEIGH_LLR_USER_HPP_
 #include <Module/Channel/Rayleigh/Channel_Rayleigh_LLR_user.hpp>
 #endif
+#ifndef RAYTRACE_GENERIC_HPP_
+#include <Module/Channel/Raytrace/Raytrace_Generic.hpp>
+#endif
 #ifndef CHANNEL_USER_ADD_HPP_
 #include <Module/Channel/User/Channel_user_add.hpp>
 #endif
