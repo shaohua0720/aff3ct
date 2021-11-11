@@ -169,6 +169,9 @@ template <typename R>
 void Raytrace_Generic<R>::_add_noise(const float *CP, const R *X_N, R *Y_N, const size_t frame_id)
 {
     //std::cout << "-------- num of "<<this->N<<" real number in total"<<std::endl;
+    std::vector<R> awgn_noise(this->N);
+    gaussian_generator->generate(awgn_noise.data(), this->N, (R)*CP);
+
     for(size_t i =0;i<this->N;)
     {
         std::complex<R> out_point(0,0);
@@ -179,6 +182,9 @@ void Raytrace_Generic<R>::_add_noise(const float *CP, const R *X_N, R *Y_N, cons
             auto phase = exp(std::complex<R>(0,2*M_PI*(this->pathDoppler[j]*time+this->pathOffset[j])));
             out_point += (std::complex<R>)this->pathRayleighGain[j]*phase*in_point;
         }
+        // add awgn noise
+        out_point += std::complex<R>(1.0f/sqrt(2)*awgn_noise[i],1.0f/sqrt(2)*awgn_noise[i+1]);
+
         Y_N[i]=out_point.real();
         Y_N[i+1]=out_point.imag();
         i+=2;

@@ -22,8 +22,8 @@ struct params
 
     int numFrames = 10000;           // number of frame errors
     int seed = 0;                    // PRNG seed for the AWGN channel
-    float ebn0_min = 0.00f;          // minimum SNR value
-    float ebn0_max = 10.00f;         // maximum SNR value
+    float ebn0_min = 10.00f;          // minimum SNR value
+    float ebn0_max = 20.00f;         // maximum SNR value
     float ebn0_step = 1.00f;         // SNR step
     int fe = 100;                    // maximum errors count
 
@@ -60,7 +60,7 @@ void init_params(params &p)
     assert(points1s <= p.sample_rate);
     if (points1s != p.sample_rate)
     {
-        std::cout<<"Warning: the extra CPs are added to the 1st symbol to align the Sampling rate."<<std::endl;
+        std::cout<<"# Info: The extra CPs are added to the 1st OFDM symbol."<<std::endl;
         p.cp[0] += p.sample_rate/1000-(s_cp+p.nFFT*p.N);
     }
 
@@ -159,10 +159,10 @@ int main(int argc, char **argv)
                           std::to_string(tools::version_minor()) + "." +
                           std::to_string(tools::version_release());
 
-    std::cout << "#----------------------------------------------------------" << std::endl;
-    std::cout << "# This is a program using the AFF3CT library (" << v << ")" << std::endl;
+    std::cout << "#-----------------------------------------------------------------" << std::endl;
+    std::cout << "# This is an OTFS simulation using the AFF3CT library (" << v << ")" << std::endl;
     std::cout << "# Feel free to improve it as you want to fit your needs." << std::endl;
-    std::cout << "#----------------------------------------------------------" << std::endl;
+    std::cout << "#-----------------------------------------------------------------" << std::endl;
     std::cout << "#" << std::endl;
 
     params p;
@@ -184,11 +184,7 @@ int main(int argc, char **argv)
         const auto esn0 = tools::ebn0_to_esn0(ebn0, p.R);
         const auto sigma = tools::esn0_to_sigma(esn0);
 
-        //u.noise->set_values(sigma, ebn0, esn0);
-
-        // update the sigma of the modem and the channel
-        //m.modem  ->set_noise(*u.noise);
-        //m.channel->set_noise(*u.noise);
+        u.noise->set_values(sigma, ebn0, esn0);
 
         // display the performance (BER and FER) in real time (in a separate thread)
         u.terminal->start_temp_report();
