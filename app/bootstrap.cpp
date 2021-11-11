@@ -8,6 +8,7 @@ using namespace aff3ct;
 
 struct params
 {
+    int fc = 0.8e9;                  // carrier frequency
     int M = 256;                     // number of SCSs
     int N = 14;                      // number of time domain symbols
 
@@ -26,7 +27,7 @@ struct params
     float ebn0_step = 1.00f;         // SNR step
     int fe = 100;                    // maximum errors count
 
-    float R = 0.5;                   // code rate (R=K/N)
+    float R = 0.5f;                   // code rate (R=K/N)
 
     int sample_rate = M*(N+1)*1000;        // sample rate
     int bitsPerSym;                  // bits per symbol
@@ -34,6 +35,10 @@ struct params
     int infoLength;
     
     std::vector<int> cp;             // CP length of OFDM
+    float RMSDelaySpread = 300.0f;      // ns
+    float speed = 350.0f;               // km/h
+    float dopplerHz;
+    float wavelength;
 };
 
 void init_params(params &p)
@@ -58,6 +63,9 @@ void init_params(params &p)
         std::cout<<"Warning: the extra CPs are added to the 1st symbol to align the Sampling rate."<<std::endl;
         p.cp[0] += p.sample_rate/1000-(s_cp+p.nFFT*p.N);
     }
+
+    p.wavelength = 299792458.0/p.fc;
+    p.dopplerHz = p.speed/3.6/p.wavelength;
     
     std::cout << "# * Simulation parameters: " << std::endl;
     std::cout << "#    ** Frames in total  = " << p.numFrames << std::endl;
@@ -90,7 +98,8 @@ void init_modules(const params &p, modules &m)
     m.cnstl = std::unique_ptr<tools::Constellation_QAM<>>(new tools::Constellation_QAM<>(p.bitsPerSym));
     m.modem = std::unique_ptr<module::Modem_generic<>>(new module::Modem_generic<>(p.bitsPerFra,*(m.cnstl)));
     m.waveform = std::unique_ptr<module::Otfs<float>>(new module::Otfs<>(p.M,p.cp,p.N));
-    m.channel = std::unique_ptr<module::Channel_AWGN_LLR<float>>(new module::Channel_AWGN_LLR<float>(p.sample_rate/1000*2));
+    m.channel = std::unique_ptr<module::Raytrace_Generic<float>>(new module::Raytrace_Generic<float>(p.sample_rate/1000*2,
+                                                    module::channel_model::EVA,p.sample_rate,p.RMSDelaySpread,p.dopplerHz));
     m.decoder = std::unique_ptr<module::Decoder_repetition_std<>>(new module::Decoder_repetition_std<>(p.infoLength,p.bitsPerFra));
     m.monitor = std::unique_ptr<module::Monitor_BFER<>>(new module::Monitor_BFER<>(p.infoLength, p.fe, p.numFrames));
 };

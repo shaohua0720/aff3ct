@@ -35,7 +35,7 @@ namespace aff3ct
             void _add_noise(const float *CP, const R *X_N, R *Y_N, const size_t frame_id);
 
         private:
-            int sample_rate;
+            long int sample_rate;
             float RMSDelaySpread;
             const float dopplerHz;
             channel_model model;
@@ -51,7 +51,7 @@ namespace aff3ct
             bool gainNormalized;
             std::shared_ptr<tools::Gaussian_noise_generator<R>> gaussian_generator;
             static float initialTime; // for time evolution
-            
+
         private:
             void initDelayGain();
         };
