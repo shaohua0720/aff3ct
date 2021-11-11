@@ -18,7 +18,7 @@ struct params
     float cpRatio = 0.07;            // CP ratio for OFDM
 
     int crcLength = 24;              // CRC length
-    int QAM = 16;                    // QAM modulation order
+    int QAM = 4;                    // QAM modulation order
 
     int numFrames = 10000;           // number of frame errors
     int seed = 0;                    // PRNG seed for the AWGN channel
@@ -29,7 +29,7 @@ struct params
 
     float R = 0.5f;                   // code rate (R=K/N)
 
-    int sample_rate = M*(N+1)*1000;        // sample rate
+    int sample_rate = M*(N+1)*1000;  // sample rate
     int bitsPerSym;                  // bits per symbol
     int bitsPerFra;                  // bits per frame
     int infoLength;

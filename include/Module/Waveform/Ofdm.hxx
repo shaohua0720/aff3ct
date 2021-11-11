@@ -132,7 +132,18 @@ namespace aff3ct
         }
 
         template <typename B>
-        void Ofdm<B>::_modulate(const B *X_K, B *Y_K, int frame_id)
+        void Ofdm<B>::_modulate(const B *X_K, B *Y_K,int frame_id)
+        {
+            this->ofdm_modulate(X_K,Y_K,frame_id);
+        }
+        template <typename B>
+        void Ofdm<B>::_demodulate(const B *X_K,  B *Y_K,int frame_id)
+        {
+            this->ofdm_demodulate(X_K,Y_K,frame_id);
+        }
+
+        template <typename B>
+        void Ofdm<B>::ofdm_modulate(const B *X_K, B *Y_K, int frame_id)
         {
             size_t B_w = sizeof(B);
             B* data = (B*)malloc(2 * fft_size * B_w);
@@ -150,7 +161,7 @@ namespace aff3ct
         }
 
         template <typename B>
-        void Ofdm<B>::_demodulate(const B *X_K, B *Y_K, int frame_id)
+        void Ofdm<B>::ofdm_demodulate(const B *X_K, B *Y_K, int frame_id)
         {
             size_t B_w = sizeof(B);
             B* data = (B*)malloc(2 * fft_size * B_w);

@@ -43,19 +43,30 @@ namespace aff3ct
         template <typename B>
         void Otfs<B>::modulate(const B *X_K, B *Y_K,int frame_id)
         {
-            size_t count = this->M * this->N * sizeof(B) * 2;
-            B* data = (B*)malloc(count);
-            this->_isfft(X_K,data); // ISFFT transform
-            this->_modulate(data,Y_K,frame_id); // Heisenberg transform
-            this->normalize(Y_K, count/sizeof(B)+cp_cplx*2,1.0/(this->M*this->N)*sqrt(this->N));
-            free(data);
+            this->_modulate(X_K,Y_K,frame_id);
         }
         template <typename B>
         void Otfs<B>::demodulate(const B *X_K, B *Y_K,int frame_id)
         {
+            this->_demodulate(X_K,Y_K,frame_id);
+        }
+
+        template <typename B>
+        void Otfs<B>::_modulate(const B *X_K, B *Y_K,int frame_id)
+        {
+            size_t count = this->M * this->N * sizeof(B) * 2;
+            B* data = (B*)malloc(count);
+            this->_isfft(X_K,data); // ISFFT transform
+            this->ofdm_modulate(data,Y_K,frame_id); // Heisenberg transform
+            this->normalize(Y_K, count/sizeof(B)+cp_cplx*2,1.0/(this->M*this->N)*sqrt(this->N));
+            free(data);
+        }
+        template <typename B>
+        void Otfs<B>::_demodulate(const B *X_K, B *Y_K,int frame_id)
+        {
             size_t count = this->M * this->N * sizeof(B) * 2;
             B* data = (B *)malloc(count);
-            this->_demodulate(X_K,data,frame_id);  //Wiener transform 
+            this->ofdm_demodulate(X_K,data,frame_id);  //Wiener transform 
             this->_sfft(data,Y_K);  // SFFT transform
             this->normalize(Y_K, count/sizeof(B),1.0/(this->M*sqrt(this->N)));
             free(data);

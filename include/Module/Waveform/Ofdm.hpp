@@ -71,8 +71,8 @@ namespace aff3ct
             virtual ~Ofdm();
             virtual Ofdm<B> *clone() const;
 
-            virtual void modulate(const B *X_K, B *Y_K,int frame_id = -1);
-            virtual void demodulate(const B *X_K,  B *Y_K,int frame_id = -1);
+            void modulate(const B *X_K, B *Y_K,int frame_id = -1);
+            void demodulate(const B *X_K,  B *Y_K,int frame_id = -1);
 
         private:
             std::vector<int> cp; // cyclic prefix points
@@ -90,8 +90,11 @@ namespace aff3ct
         protected:
             void _fft(const B *X_K, B *Y_K);
             void _ifft(const B *X_K, B *Y_K);
-            void _modulate(const B *X_K, B *Y_K,int frame_id = -1);
-            void _demodulate(const B *X_K,  B *Y_K,int frame_id = -1);
+            virtual void _modulate(const B *X_K, B *Y_K,int frame_id = -1);
+            virtual void _demodulate(const B *X_K,  B *Y_K,int frame_id = -1);
+
+            void ofdm_modulate(const B *X_K, B *Y_K,int frame_id = -1);
+            void ofdm_demodulate(const B *X_K,  B *Y_K,int frame_id = -1);
 
             void display_arrary(const B* data, size_t size, const std::string info);
         };

@@ -161,7 +161,7 @@ void Raytrace_Generic<R>::initDelayGain()
     for(auto& i : this->delayProfile)
     {
         this->delayInSample.push_back(ceil(i*this->sample_rate)); //floor or ceil or round
-        i = this->delayInSample.back()*1.0d/this->sample_rate;
+        i = this->delayInSample.back()*1.0f/this->sample_rate;
     }
 }
 
