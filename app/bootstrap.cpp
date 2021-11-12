@@ -196,9 +196,9 @@ int main(int argc, char **argv)
             m.source->generate(b.ref_bits);
             m.encoder->encode(b.ref_bits, b.enc_bits);
             m.modem->modulate(b.enc_bits, b.qam_symbols);
-            m.waveform->modulate(b.qam_symbols.data(), b.otfs_mod_symbols.data());
+            m.waveform->modulate(b.qam_symbols, b.otfs_mod_symbols);
             m.channel->add_noise(chl_p,b.otfs_mod_symbols,b.noisy_symbols);
-            m.waveform->demodulate(b.noisy_symbols.data(),b.otfs_demod_symbols.data());
+            m.waveform->demodulate(b.noisy_symbols,b.otfs_demod_symbols);
             m.modem->demodulate(chl_p,b.otfs_demod_symbols,b.LLRs);
             m.decoder->decode_siho(b.LLRs, b.dec_bits);
             m.monitor->check_errors(b.dec_bits, b.ref_bits);

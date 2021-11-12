@@ -71,8 +71,11 @@ namespace aff3ct
             virtual ~Ofdm();
             virtual Ofdm<B> *clone() const;
 
-            void modulate(const B *X_K, B *Y_K,int frame_id = -1);
-            void demodulate(const B *X_K,  B *Y_K,int frame_id = -1);
+            template <class BA = std::vector<B>>
+            void modulate(const std::vector<B,BA> &X_K, std::vector<B,BA> &Y_K,int frame_id = -1);
+            
+            template <class BA = std::vector<B>>
+            void demodulate(const std::vector<B,BA> &X_K, std::vector<B,BA> &Y_K,int frame_id = -1);
 
         private:
             std::vector<int> cp; // cyclic prefix points

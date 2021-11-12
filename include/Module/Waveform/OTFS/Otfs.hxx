@@ -41,14 +41,17 @@ namespace aff3ct
             fftwf_free(sfft_data_inplace);
         }
         template <typename B>
-        void Otfs<B>::modulate(const B *X_K, B *Y_K,int frame_id)
+        template <class BA>
+        void Otfs<B>::modulate(const std::vector<B,BA> &X_K, std::vector<B,BA> &Y_K,int frame_id)
         {
-            this->_modulate(X_K,Y_K,frame_id);
+            this->_modulate(X_K.data(),Y_K.data(),frame_id);
         }
+
         template <typename B>
-        void Otfs<B>::demodulate(const B *X_K, B *Y_K,int frame_id)
+        template <class BA>
+        void Otfs<B>::demodulate(const std::vector<B,BA> &X_K, std::vector<B,BA> &Y_K,int frame_id)
         {
-            this->_demodulate(X_K,Y_K,frame_id);
+            this->_demodulate(X_K.data(),Y_K.data(),frame_id);
         }
 
         template <typename B>

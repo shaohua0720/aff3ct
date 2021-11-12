@@ -29,8 +29,11 @@ namespace module
         virtual ~Otfs();
         
         // data in X_K is column-major, which is M x N
-        void modulate(const B *X_K, B *Y_K,int frame_id = -1); 
-        void demodulate(const B *X_K, B *Y_K,int frame_id = -1); 
+        template <class BA = std::vector<B>>
+        void modulate(const std::vector<B,BA> &X_K, std::vector<B,BA> &Y_K,int frame_id = -1); 
+
+        template <class BA = std::vector<B>>
+        void demodulate(const std::vector<B,BA> &X_K, std::vector<B,BA> &Y_K,int frame_id = -1); 
 
     protected:
         virtual void _modulate(const B *X_K, B *Y_K,int frame_id = -1); 

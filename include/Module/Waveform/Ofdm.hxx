@@ -72,7 +72,7 @@ namespace aff3ct
                                      auto &ofdm = static_cast<Ofdm<B> &>(m);
                                      B *in = static_cast<B *>(t[pmod_X_K].get_dataptr());
                                      B *out = static_cast<B *>(t[pmod_Y_K].get_dataptr());
-                                     ofdm.modulate(in,out);
+                                     ofdm._modulate(in,out);
                                      return status_t::SUCCESS;
                                  });
 
@@ -85,7 +85,7 @@ namespace aff3ct
                                      auto &ofdm = static_cast<Ofdm<B> &>(m);
                                      B *in = static_cast<B *>(t[pdemod_X_K].get_dataptr());
                                      B *out = static_cast<B *>(t[pdemod_Y_K].get_dataptr());
-                                     ofdm.demodulate(in,out);
+                                     ofdm._demodulate(in,out);
                                      return status_t::SUCCESS;
                                  });
         }
@@ -121,14 +121,16 @@ namespace aff3ct
         }
 
         template <typename B>
-        void Ofdm<B>::modulate(const B *X_K, B *Y_K,int frame_id)
+        template <class BA>
+        void Ofdm<B>::modulate(const std::vector<B,BA> &X_K, std::vector<B,BA> &Y_K,int frame_id)
         {
-            this->_modulate(X_K,Y_K,frame_id);
+            this->_modulate(X_K.data(),Y_K.data(),frame_id);
         }
         template <typename B>
-        void Ofdm<B>::demodulate(const B *X_K,  B *Y_K,int frame_id)
+        template <class BA>
+        void Ofdm<B>::demodulate(const std::vector<B,BA> &X_K, std::vector<B,BA> &Y_K,int frame_id)
         {
-            this->_demodulate(X_K,Y_K,frame_id);
+            this->_demodulate(X_K.data(),Y_K.data(),frame_id);
         }
 
         template <typename B>
